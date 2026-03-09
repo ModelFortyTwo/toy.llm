@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Casio fx-82MS Replica</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #1f1f1f;
+      --panel: #20212a;
+      --highlight: #f2c14c;
+      --key: #2c2d39;
+      --special-key: #4b4c5d;
+      --text-key: #f6f6f6;
+      --screen: #0f111a;
+      --screen-border: #3a3b45;
+      font-family: "Segoe UI", "Roboto", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(145deg, #0c0c11, #1f1f2c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .calculator {
+      width: min(360px, 90vw);
+      background: radial-gradient(circle at top, #3a3b45, #191a1f 55%);
+      border-radius: 24px;
+      padding: 24px 20px 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65);
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .top-bar .model {
+      font-weight: 600;
+    }
+
+    .screen {
+      background: var(--screen);
+      border: 2px solid var(--screen-border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 80px;
+    }
+
+    .screen .mode {
+      font-size: 0.8rem;
+      color: #7b7d8c;
+    }
+
+    #display {
+      font-size: 2rem;
+      word-break: break-all;
+      text-align: right;
+      font-family: "Digital-7", "Segoe UI", sans-serif;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .buttons button {
+      border: none;
+      border-radius: 10px;
+      padding: 14px 0;
+      font-size: 0.95rem;
+      background: var(--key);
+      color: var(--text-key);
+      box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    .buttons button.special {
+      background: var(--special-key);
+    }
+
+    .buttons button.accent {
+      background: var(--highlight);
+      color: #1a1a1a;
+      box-shadow: inset 0 -4px rgba(0, 0, 0, 0.18);
+    }
+
+    .buttons button:active {
+      transform: translateY(1px);
+      box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+    }
+
+    .buttons button.wide {
+      grid-column: span 2;
+    }
+
+    @media (max-width: 420px) {
+      .buttons {
+        gap: 6px;
+      }
+
+      .buttons button {
+        padding: 12px 0;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="top-bar">
+      <div class="model">Casio fx-82MS</div>
+      <div class="serial">Scientific</div>
+    </div>
+    <div class="screen">
+      <div class="mode" id="angle-mode">DEG</div>
+      <div id="display">0</div>
+    </div>
+    <div class="buttons">
+      <button class="special" data-action="toggle-angle">DRG</button>
+      <button class="special" data-action="toggle-sign">+/-</button>
+      <button class="special" data-action="percent">%</button>
+      <button class="special" data-action="clear">AC</button>
+      <button class="special" data-action="delete">DEL</button>
+      <button class="special accent" data-action="ans">ANS</button>
+
+      <button data-value="sin(">sin</button>
+      <button data-value="cos(">cos</button>
+      <button data-value="tan(">tan</button>
+      <button data-value="log(">log</button>
+      <button data-value="ln(">ln</button>
+      <button data-action="pi">π</button>
+
+      <button data-value="(">(</button>
+      <button data-value=")">)</button>
+      <button data-value="^">^</button>
+      <button data-value="√(">√</button>
+      <button data-value="exp(">e^x</button>
+      <button data-value="10^">10^</button>
+
+      <button data-value="7">7</button>
+      <button data-value="8">8</button>
+      <button data-value="9">9</button>
+      <button data-value="÷">÷</button>
+      <button data-value="×">×</button>
+      <button data-value="-">-</button>
+
+      <button data-value="4">4</button>
+      <button data-value="5">5</button>
+      <button data-value="6">6</button>
+      <button data-value="+">+</button>
+      <button data-action="square">x²</button>
+      <button data-action="cube">x³</button>
+
+      <button data-value="1">1</button>
+      <button data-value="2">2</button>
+      <button data-value="3">3</button>
+      <button data-value="0">0</button>
+      <button data-value=".">.</button>
+      <button data-action="e">e</button>
+
+      <button class="wide accent" data-action="calculate">=</button>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const display = document.querySelector('#display');
+      const modeBadge = document.querySelector('#angle-mode');
+      let expression = '';
+      let lastAnswer = 0;
+      let angleMode = 'DEG';
+
+      const actions = {
+        'clear': () => {
+          expression = '';
+          updateDisplay();
+        },
+        'delete': () => {
+          expression = expression.slice(0, -1);
+          updateDisplay();
+        },
+        'toggle-sign': () => {
+          if (!expression) return;
+          if (expression.startsWith('-(') && expression.endsWith(')')) {
+            expression = expression.slice(2, -1);
+          } else {
+            expression = `-(${expression})`;
+          }
+          updateDisplay();
+        },
+        'percent': () => {
+          if (!expression) return;
+          expression += '*0.01';
+          updateDisplay();
+        },
+        'ans': () => {
+          expression += String(lastAnswer);
+          updateDisplay();
+        },
+        'pi': () => {
+          expression += 'π';
+          updateDisplay();
+        },
+        'square': () => {
+          expression += '^2';
+          updateDisplay();
+        },
+        'cube': () => {
+          expression += '^3';
+          updateDisplay();
+        },
+        'e': () => {
+          expression += 'e';
+          updateDisplay();
+        },
+        'toggle-angle': () => {
+          angleMode = angleMode === 'DEG' ? 'RAD' : 'DEG';
+          modeBadge.textContent = angleMode;
+        },
+        'calculate': () => {
+          if (!expression) return;
+          try {
+            const sanitized = sanitizeExpression(expression);
+            const fn = new Function('sin', 'cos', 'tan', 'log', 'ln', 'sqrt', 'exp', 'ans', 'pi', 'e', `return ${sanitized};`);
+            const result = fn(
+              userSin,
+              userCos,
+              userTan,
+              userLog,
+              userLn,
+              Math.sqrt,
+              userExp,
+              lastAnswer,
+              Math.PI,
+              Math.E
+            );
+            if (Number.isFinite(result)) {
+              lastAnswer = result;
+              expression = String(result);
+              updateDisplay();
+            } else {
+              throw new Error('Invalid result');
+            }
+          } catch (err) {
+            expression = '';
+            display.textContent = 'Error';
+          }
+        }
+      };
+
+      function updateDisplay() {
+        display.textContent = expression || '0';
+      }
+
+      function sanitizeExpression(raw) {
+        return raw
+          .replace(/×/g, '*')
+          .replace(/÷/g, '/')
+          .replace(/π/g, 'pi')
+          .replace(/ANS/g, 'ans')
+          .replace(/√\(/g, 'sqrt(')
+          .replace(/10\^/g, '10**')
+          .replace(/\^/g, '**');
+      }
+
+      function toRadians(value) {
+        return angleMode === 'DEG' ? (value * Math.PI) / 180 : value;
+      }
+
+      function userSin(value) {
+        return Math.sin(toRadians(value));
+      }
+
+      function userCos(value) {
+        return Math.cos(toRadians(value));
+      }
+
+      function userTan(value) {
+        return Math.tan(toRadians(value));
+      }
+
+      function userLog(value) {
+        return Math.log10(value);
+      }
+
+      function userLn(value) {
+        return Math.log(value);
+      }
+
+      function userExp(value) {
+        return Math.exp(value);
+      }
+
+      document.querySelectorAll('.buttons button').forEach(button => {
+        button.addEventListener('click', () => {
+          const value = button.getAttribute('data-value');
+          const action = button.getAttribute('data-action');
+          if (action && actions[action]) {
+            actions[action]();
+          } else if (value) {
+            expression += value;
+            updateDisplay();
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Casio fx-82MS (Web)</title>
+  <style>
+    :root {
+      --body-bg: #2a2f36;
+      --calc-bg: #c9c7be;
+      --calc-shadow: rgba(0, 0, 0, 0.35);
+      --panel: #dad8cf;
+      --screen-bg: #cfe3d7;
+      --screen-text: #0b1a12;
+      --key-bg: #e8e5dc;
+      --key-bg-dark: #d3d0c7;
+      --key-text: #1f2327;
+      --accent: #ca3232;
+      --accent-dark: #a82626;
+      --label: #3b4046;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at 20% 20%, #3a4048, #1f2227 60%, #181a1f);
+      color: #1f2327;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    }
+
+    .calculator {
+      width: min(420px, 92vw);
+      background: linear-gradient(145deg, #d7d3c9, #c1beb4);
+      border-radius: 16px;
+      padding: 18px 18px 20px;
+      box-shadow: 0 16px 35px var(--calc-shadow);
+      border: 1px solid #a9a79c;
+    }
+
+    .brand {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      color: var(--label);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .brand small {
+      font-weight: 600;
+      opacity: 0.8;
+    }
+
+    .screen {
+      background: linear-gradient(160deg, #dff0e6, #c6dccc);
+      border-radius: 10px;
+      padding: 12px;
+      border: 2px solid #98b0a3;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.15);
+      font-family: "Lucida Console", "Courier New", monospace;
+    }
+
+    .status {
+      display: flex;
+      gap: 10px;
+      font-size: 12px;
+      margin-bottom: 6px;
+      color: #1d2a22;
+    }
+
+    .status span {
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(16, 26, 20, 0.1);
+      border: 1px solid rgba(16, 26, 20, 0.2);
+    }
+
+    .status span.inactive {
+      opacity: 0.4;
+    }
+
+    .display {
+      min-height: 56px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      color: var(--screen-text);
+    }
+
+    .display .history {
+      font-size: 14px;
+      text-align: right;
+      min-height: 16px;
+      opacity: 0.75;
+    }
+
+    .display .output {
+      font-size: 22px;
+      text-align: right;
+      min-height: 26px;
+      word-break: break-all;
+    }
+
+    .keys {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+    }
+
+    button.key {
+      border: none;
+      border-radius: 8px;
+      background: var(--key-bg);
+      color: var(--key-text);
+      font-size: 14px;
+      padding: 10px 6px;
+      min-height: 46px;
+      cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+
+    button.key:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    button.key.fn {
+      background: var(--key-bg-dark);
+      font-weight: 700;
+    }
+
+    button.key.accent {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    button.key.accent:active {
+      background: var(--accent-dark);
+    }
+
+    .shift-label {
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      font-size: 10px;
+      color: #a24822;
+      opacity: 0.8;
+    }
+
+    .key-wide {
+      grid-column: span 2;
+    }
+
+    @media (max-width: 420px) {
+      .calculator {
+        padding: 14px;
+      }
+
+      button.key {
+        min-height: 42px;
+        font-size: 13px;
+      }
+
+      .display .output {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="brand">
+      <span>CASIO</span>
+      <small>fx-82MS</small>
+    </div>
+
+    <div class="screen">
+      <div class="status">
+        <span id="mode-indicator">DEG</span>
+        <span id="shift-indicator" class="inactive">SHIFT</span>
+        <span id="alpha-indicator" class="inactive">ALPHA</span>
+        <span id="mem-indicator" class="inactive">M</span>
+      </div>
+      <div class="display">
+        <div class="history" id="history"></div>
+        <div class="output" id="output">0</div>
+      </div>
+    </div>
+
+    <div class="keys">
+      <button class="key fn" data-action="shift">SHIFT</button>
+      <button class="key fn" data-action="alpha">ALPHA</button>
+      <button class="key fn" data-action="mode">MODE</button>
+      <button class="key fn" data-action="drg">DRG</button>
+      <button class="key fn" data-action="del">DEL</button>
+      <button class="key accent" data-action="ac">AC</button>
+
+      <button class="key" data-insert="^2" data-shift-insert="^3">x^2<span class="shift-label">x^3</span></button>
+      <button class="key" data-insert="^-1" data-shift-insert="!">x^-1<span class="shift-label">x!</span></button>
+      <button class="key" data-insert="sqrt(" data-shift-insert="cbrt(">sqrt<span class="shift-label">cbrt</span></button>
+      <button class="key" data-insert="log(" data-shift-insert="10^(">log<span class="shift-label">10^x</span></button>
+      <button class="key" data-insert="ln(" data-shift-insert="e^(">ln<span class="shift-label">e^x</span></button>
+      <button class="key" data-insert="(" data-shift-insert=")">( <span class="shift-label">)</span></button>
+
+      <button class="key" data-action="neg" data-shift-insert="abs(">(-)<span class="shift-label">abs</span></button>
+      <button class="key" data-insert="sin(" data-shift-insert="asin(">sin<span class="shift-label">asin</span></button>
+      <button class="key" data-insert="cos(" data-shift-insert="acos(">cos<span class="shift-label">acos</span></button>
+      <button class="key" data-insert="tan(" data-shift-insert="atan(">tan<span class="shift-label">atan</span></button>
+      <button class="key" data-insert="pi" data-shift-insert="e">PI<span class="shift-label">E</span></button>
+      <button class="key" data-action="exp">EXP</button>
+
+      <button class="key" data-insert="7">7</button>
+      <button class="key" data-insert="8">8</button>
+      <button class="key" data-insert="9">9</button>
+      <button class="key" data-insert="/">/</button>
+      <button class="key" data-action="mplus">M+</button>
+      <button class="key" data-action="mminus">M-</button>
+
+      <button class="key" data-insert="4">4</button>
+      <button class="key" data-insert="5">5</button>
+      <button class="key" data-insert="6">6</button>
+      <button class="key" data-insert="*">*</button>
+      <button class="key" data-action="mr" data-shift-action="sto">MR<span class="shift-label">STO</span></button>
+      <button class="key" data-action="mc">MC</button>
+
+      <button class="key" data-insert="1">1</button>
+      <button class="key" data-insert="2">2</button>
+      <button class="key" data-insert="3">3</button>
+      <button class="key" data-insert="-">-</button>
+      <button class="key" data-insert="Ans">Ans</button>
+      <button class="key accent" data-action="equals">=</button>
+
+      <button class="key" data-insert="0">0</button>
+      <button class="key" data-insert=".">.</button>
+      <button class="key" data-insert="+">+</button>
+      <button class="key" data-insert="^">x^y</button>
+      <button class="key" data-insert="%">%</button>
+      <button class="key" data-action="sto">STO</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const outputEl = document.getElementById("output");
+      const historyEl = document.getElementById("history");
+      const modeEl = document.getElementById("mode-indicator");
+      const shiftEl = document.getElementById("shift-indicator");
+      const alphaEl = document.getElementById("alpha-indicator");
+      const memEl = document.getElementById("mem-indicator");
+
+      let expression = "";
+      let lastAnswer = 0;
+      let memory = 0;
+      let memorySet = false;
+      let shiftActive = false;
+      let alphaActive = false;
+      let modeIndex = 0;
+      const modes = ["DEG", "RAD", "GRAD"];
+
+      const tokens = [
+        "asin(", "acos(", "atan(", "sin(", "cos(", "tan(",
+        "log(", "ln(", "sqrt(", "cbrt(", "abs(", "Ans", "pi", "M"
+      ];
+
+      function updateIndicators() {
+        modeEl.textContent = modes[modeIndex];
+        shiftEl.classList.toggle("inactive", !shiftActive);
+        alphaEl.classList.toggle("inactive", !alphaActive);
+        memEl.classList.toggle("inactive", !memorySet);
+      }
+
+      function formatNumber(value) {
+        if (!Number.isFinite(value)) return "Error";
+        if (Object.is(value, -0)) value = 0;
+        let str = Number(value).toPrecision(12);
+        if (str.includes("e")) {
+          return str.replace("+", "");
+        }
+        str = str.replace(/\.0+$/, "");
+        str = str.replace(/(\.\d*?)0+$/, "$1");
+        return str;
+      }
+
+      function updateDisplay() {
+        outputEl.textContent = expression || "0";
+      }
+
+      function endsWithValue(expr) {
+        return /\d$/.test(expr) || expr.endsWith(")") || expr.endsWith("pi") || expr.endsWith("e") || expr.endsWith("Ans") || expr.endsWith("M");
+      }
+
+      function startsValue(token) {
+        return /^[\d.]/.test(token) || token === "(" || token === "pi" || token === "e" || token === "Ans" || token === "M" || token.endsWith("(");
+      }
+
+      function appendToken(token) {
+        if (!token) return;
+        if (token === "E") {
+          const prev = expression.slice(-1);
+          if (!/\d$/.test(prev)) return;
+          expression += "E";
+          updateDisplay();
+          return;
+        }
+        if (endsWithValue(expression) && startsValue(token)) {
+          expression += "*";
+        }
+        expression += token;
+        updateDisplay();
+      }
+
+      function deleteLastToken() {
+        for (const token of tokens) {
+          if (expression.endsWith(token)) {
+            expression = expression.slice(0, -token.length);
+            updateDisplay();
+            return;
+          }
+        }
+        expression = expression.slice(0, -1);
+        updateDisplay();
+      }
+
+      function toggleSign() {
+        const match = expression.match(/(.*?)(-?\d*\.?\d+)$/);
+        if (match) {
+          const head = match[1];
+          const num = match[2];
+          if (num.startsWith("-")) {
+            expression = head + num.slice(1);
+          } else {
+            expression = head + "-" + num;
+          }
+        } else {
+          expression += "-";
+        }
+        updateDisplay();
+      }
+
+      function normalizeExpression(raw) {
+        let expr = raw;
+        expr = expr.replace(/Ans/g, `(${String(lastAnswer)})`);
+        expr = expr.replace(/\^/g, "**");
+        expr = expr.replace(/(\d+(?:\.\d+)?)%/g, "($1*0.01)");
+        expr = expr.replace(/(\d+(?:\.\d+)?)!/g, "fact($1)");
+        return expr;
+      }
+
+      function computeExpression(expr) {
+        const angle = modes[modeIndex];
+        const toRadians = (x) => {
+          if (angle === "DEG") return x * Math.PI / 180;
+          if (angle === "GRAD") return x * Math.PI / 200;
+          return x;
+        };
+        const fromRadians = (x) => {
+          if (angle === "DEG") return x * 180 / Math.PI;
+          if (angle === "GRAD") return x * 200 / Math.PI;
+          return x;
+        };
+
+        const scope = {
+          sin: (x) => Math.sin(toRadians(x)),
+          cos: (x) => Math.cos(toRadians(x)),
+          tan: (x) => Math.tan(toRadians(x)),
+          asin: (x) => fromRadians(Math.asin(x)),
+          acos: (x) => fromRadians(Math.acos(x)),
+          atan: (x) => fromRadians(Math.atan(x)),
+          log: (x) => Math.log10(x),
+          ln: (x) => Math.log(x),
+          sqrt: (x) => Math.sqrt(x),
+          cbrt: (x) => Math.cbrt(x),
+          abs: (x) => Math.abs(x),
+          fact: (x) => {
+            if (x < 0 || !Number.isFinite(x)) return NaN;
+            const n = Math.floor(x);
+            if (n !== x) return NaN;
+            let result = 1;
+            for (let i = 2; i <= n; i += 1) result *= i;
+            return result;
+          },
+          pi: Math.PI,
+          e: Math.E,
+          M: memory
+        };
+
+        const args = Object.keys(scope);
+        const values = Object.values(scope);
+        const fn = new Function(...args, `"use strict"; return (${expr});`);
+        return fn(...values);
+      }
+
+      function evaluate() {
+        if (!expression.trim()) return;
+        const expr = normalizeExpression(expression);
+        try {
+          const result = computeExpression(expr);
+          if (!Number.isFinite(result)) {
+            throw new Error("Math error");
+          }
+          lastAnswer = result;
+          historyEl.textContent = expression + " =";
+          expression = formatNumber(result);
+          outputEl.textContent = expression;
+        } catch (err) {
+          historyEl.textContent = expression + " =";
+          outputEl.textContent = "Error";
+          expression = "";
+        }
+      }
+
+      function setMemory(value) {
+        memory = value;
+        memorySet = true;
+        updateIndicators();
+      }
+
+      function currentValue() {
+        if (!expression.trim()) return lastAnswer;
+        try {
+          const expr = normalizeExpression(expression);
+          const result = computeExpression(expr);
+          if (!Number.isFinite(result)) return lastAnswer;
+          return result;
+        } catch (err) {
+          return lastAnswer;
+        }
+      }
+
+      function handleAction(action) {
+        switch (action) {
+          case "shift":
+            shiftActive = !shiftActive;
+            updateIndicators();
+            return;
+          case "alpha":
+            alphaActive = !alphaActive;
+            updateIndicators();
+            return;
+          case "mode":
+            modeIndex = 0;
+            updateIndicators();
+            return;
+          case "drg":
+            modeIndex = (modeIndex + 1) % modes.length;
+            updateIndicators();
+            return;
+          case "del":
+            deleteLastToken();
+            break;
+          case "ac":
+            expression = "";
+            historyEl.textContent = "";
+            outputEl.textContent = "0";
+            break;
+          case "neg":
+            toggleSign();
+            break;
+          case "equals":
+            evaluate();
+            break;
+          case "exp":
+            appendToken("E");
+            break;
+          case "mplus":
+            setMemory(memory + currentValue());
+            break;
+          case "mminus":
+            setMemory(memory - currentValue());
+            break;
+          case "mr":
+            appendToken("M");
+            break;
+          case "mc":
+            memory = 0;
+            memorySet = false;
+            updateIndicators();
+            break;
+          case "sto":
+            setMemory(currentValue());
+            break;
+          default:
+            return;
+        }
+        shiftActive = false;
+        updateIndicators();
+      }
+
+      document.querySelectorAll("button.key").forEach((button) => {
+        button.addEventListener("click", () => {
+          const shiftInsert = button.getAttribute("data-shift-insert");
+          const shiftAction = button.getAttribute("data-shift-action");
+          const insert = button.getAttribute("data-insert");
+          const action = button.getAttribute("data-action");
+
+          if (shiftActive && shiftAction) {
+            handleAction(shiftAction);
+            shiftActive = false;
+            updateIndicators();
+            return;
+          }
+
+          if (shiftActive && shiftInsert) {
+            appendToken(shiftInsert);
+            shiftActive = false;
+            updateIndicators();
+            return;
+          }
+
+          if (action) {
+            handleAction(action);
+            return;
+          }
+
+          if (insert) {
+            appendToken(insert);
+            shiftActive = false;
+            updateIndicators();
+          }
+        });
+      });
+
+      updateIndicators();
+      updateDisplay();
+    })();
+  </script>
+</body>
+</html>
