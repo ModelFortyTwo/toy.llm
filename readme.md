@@ -2,11 +2,26 @@
 
 This repo contains some toy benchmarks for testing performance of open source coding models.
 
+## Live demos
+
+The GitHub Actions Pages pipeline publishes a static index that discovers every `.html` example in the repo and groups links by folder structure.
+
+- [Site index](https://modelfortytwo.github.io/toy.llm/)
+- [gpt-5.1-codex-mini-high calculator](https://modelfortytwo.github.io/toy.llm/001/codex/gpt-5.1-codex-mini-high/calculator.html)
+- [gpt-5.2-codex-high calculator](https://modelfortytwo.github.io/toy.llm/001/codex/gpt-5.2-codex-high/calculator.html)
+- [gpt-5.3-codex-high calculator](https://modelfortytwo.github.io/toy.llm/001/codex/gpt-5.3-codex-high/calculator.html)
+- [gpt-5.4-high calculator](https://modelfortytwo.github.io/toy.llm/001/codex/gpt-5.4-high/calculator.html)
+
 ## Tasks
 
 ### 1. HTML + js Calculator app
 
 **Task** Implement Casio fx-82MS calculator using HTML and js to calculator.html.
+
+- [Source: `001/codex/gpt-5.1-codex-mini-high/calculator.html`](001/codex/gpt-5.1-codex-mini-high/calculator.html)
+- [Source: `001/codex/gpt-5.2-codex-high/calculator.html`](001/codex/gpt-5.2-codex-high/calculator.html)
+- [Source: `001/codex/gpt-5.3-codex-high/calculator.html`](001/codex/gpt-5.3-codex-high/calculator.html)
+- [Source: `001/codex/gpt-5.4-high/calculator.html`](001/codex/gpt-5.4-high/calculator.html)
 
 ### 2. HTML + js Snake game
 
