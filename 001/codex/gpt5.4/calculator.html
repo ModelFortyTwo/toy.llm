@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Casio fx-82MS Calculator</title>
+  <style>
+    :root {
+      --bg-top: #e8edf1;
+      --bg-bottom: #b9c0c6;
+      --body-top: #e7eadc;
+      --body-bottom: #bec4b7;
+      --panel: #3a4645;
+      --panel-edge: #212a29;
+      --screen-top: #d8e0c5;
+      --screen-bottom: #b8c39f;
+      --ink: #0e1514;
+      --muted: #5f6963;
+      --light-ink: #edf2ef;
+      --key-light: #f4f5f1;
+      --key-mid: #cfd1c7;
+      --key-dark: #4c5661;
+      --key-dark-2: #2c333a;
+      --accent: #c99d3e;
+      --accent-red: #b13e34;
+      --shadow: rgba(17, 22, 24, 0.24);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at top, rgba(255, 255, 255, 0.9), transparent 38%),
+        linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+      font-family: "Trebuchet MS", "Aptos", sans-serif;
+      color: var(--ink);
+    }
+
+    .calculator {
+      width: min(420px, 100%);
+      padding: 24px 20px 22px;
+      border-radius: 28px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.5), transparent 14%),
+        linear-gradient(180deg, var(--body-top), var(--body-bottom));
+      box-shadow:
+        0 24px 40px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        inset 0 -3px 6px rgba(42, 48, 43, 0.22);
+      border: 1px solid rgba(65, 76, 69, 0.24);
+    }
+
+    .brand {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      margin-bottom: 16px;
+      gap: 16px;
+    }
+
+    .brand__casio {
+      font-size: 1.55rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .brand__model {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+      font-size: 0.8rem;
+    }
+
+    .brand__model strong {
+      font-size: 1rem;
+      letter-spacing: 0.06em;
+    }
+
+    .solar {
+      margin-bottom: 16px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      background: #2e3a39;
+      border-radius: 10px;
+      padding: 8px;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.34);
+    }
+
+    .solar span {
+      display: block;
+      height: 20px;
+      border-radius: 4px;
+      background: linear-gradient(180deg, #516665, #20302f);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .screen-shell {
+      border-radius: 18px;
+      padding: 10px 12px 12px;
+      background: linear-gradient(180deg, var(--panel), var(--panel-edge));
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 10px 18px rgba(0, 0, 0, 0.16);
+    }
+
+    .screen {
+      border-radius: 12px;
+      padding: 10px 12px 12px;
+      min-height: 112px;
+      background: linear-gradient(180deg, var(--screen-top), var(--screen-bottom));
+      box-shadow:
+        inset 0 2px 4px rgba(50, 62, 41, 0.28),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.45);
+    }
+
+    .status {
+      display: flex;
+      gap: 10px;
+      min-height: 18px;
+      margin-bottom: 10px;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      color: rgba(14, 21, 20, 0.72);
+    }
+
+    .status span {
+      opacity: 0.28;
+      transition: opacity 120ms ease;
+    }
+
+    .status span.active {
+      opacity: 1;
+      font-weight: 700;
+    }
+
+    .expression,
+    .result {
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: right;
+      color: var(--ink);
+    }
+
+    .expression {
+      min-height: 24px;
+      font-size: 1rem;
+      letter-spacing: 0.03em;
+      opacity: 0.76;
+    }
+
+    .result {
+      min-height: 44px;
+      font-size: clamp(1.6rem, 5vw, 2.25rem);
+      letter-spacing: 0.04em;
+      font-family: "Lucida Console", "Consolas", monospace;
+    }
+
+    .keypad {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .key {
+      position: relative;
+      min-height: 58px;
+      border: none;
+      border-radius: 14px;
+      padding: 18px 6px 10px;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+      color: var(--ink);
+      background: linear-gradient(180deg, var(--key-light), var(--key-mid));
+      box-shadow:
+        0 4px 0 rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.86);
+      transition: transform 80ms ease, box-shadow 80ms ease, filter 80ms ease;
+      user-select: none;
+    }
+
+    .key:hover {
+      filter: brightness(1.02);
+    }
+
+    .key:active,
+    .key.is-active {
+      transform: translateY(3px);
+      box-shadow:
+        0 1px 0 rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    }
+
+    .key--dark {
+      color: var(--light-ink);
+      background: linear-gradient(180deg, var(--key-dark), var(--key-dark-2));
+      box-shadow:
+        0 4px 0 rgba(16, 20, 23, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+
+    .key--accent {
+      background: linear-gradient(180deg, #edcb76, var(--accent));
+    }
+
+    .key--danger {
+      color: var(--light-ink);
+      background: linear-gradient(180deg, #d96057, var(--accent-red));
+    }
+
+    .key__secondary {
+      position: absolute;
+      top: 6px;
+      left: 8px;
+      right: 8px;
+      font-size: 0.58rem;
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #c87420;
+      opacity: 0.95;
+      text-align: left;
+      pointer-events: none;
+    }
+
+    .key__primary {
+      display: block;
+      font-size: 1rem;
+      line-height: 1.05;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .key__primary.small {
+      font-size: 0.9rem;
+    }
+
+    .footnote {
+      margin-top: 12px;
+      text-align: center;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    @media (max-width: 460px) {
+      body {
+        padding: 12px;
+      }
+
+      .calculator {
+        padding: 18px 14px 16px;
+        border-radius: 22px;
+      }
+
+      .keypad {
+        gap: 8px;
+      }
+
+      .key {
+        min-height: 54px;
+        border-radius: 12px;
+      }
+
+      .brand__casio {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="calculator">
+    <header class="brand">
+      <div class="brand__casio">CASIO</div>
+      <div class="brand__model">
+        <span>Scientific Calculator</span>
+        <strong>fx-82MS</strong>
+      </div>
+    </header>
+
+    <section class="solar" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
+    </section>
+
+    <section class="screen-shell">
+      <div class="screen" aria-live="polite">
+        <div class="status">
+          <span data-status="shift">SHIFT</span>
+          <span data-status="hyp">HYP</span>
+          <span data-status="memory">M</span>
+          <span data-status="angle">DEG</span>
+        </div>
+        <div id="expression" class="expression"></div>
+        <div id="result" class="result">0</div>
+      </div>
+    </section>
+
+    <section id="keypad" class="keypad" aria-label="Calculator keypad"></section>
+
+    <div class="footnote">HTML + JavaScript replica with scientific functions, memory, and angle modes</div>
+  </main>
+
+  <script>
+    const keyLayout = [
+      [
+        { label: "SHIFT", secondary: "", action: "toggle-shift", theme: "accent" },
+        { label: "HYP", secondary: "", action: "toggle-hyp", theme: "dark" },
+        { label: "MODE", secondary: "", action: "mode", theme: "dark" },
+        { label: "DEL", secondary: "", action: "delete", theme: "dark" },
+        { label: "AC", secondary: "", action: "clear", theme: "danger" }
+      ],
+      [
+        { label: "MC", secondary: "", action: "memory-clear", theme: "dark" },
+        { label: "MR", secondary: "M", action: "memory-recall", theme: "dark" },
+        { label: "M+", secondary: "", action: "memory-add", theme: "dark" },
+        { label: "M-", secondary: "", action: "memory-subtract", theme: "dark" },
+        { label: "Ans", secondary: "", action: "insert", value: "Ans", theme: "dark" }
+      ],
+      [
+        { label: "sin", secondary: "sin⁻¹", action: "function", value: "sin", shiftValue: "asin" },
+        { label: "cos", secondary: "cos⁻¹", action: "function", value: "cos", shiftValue: "acos" },
+        { label: "tan", secondary: "tan⁻¹", action: "function", value: "tan", shiftValue: "atan" },
+        { label: "(", secondary: "", action: "insert", value: "(" },
+        { label: ")", secondary: "", action: "insert", value: ")" }
+      ],
+      [
+        { label: "log", secondary: "10ˣ", action: "function", value: "log", shiftValue: "pow10" },
+        { label: "ln", secondary: "eˣ", action: "function", value: "ln", shiftValue: "exp" },
+        { label: "xʸ", secondary: "", action: "insert", value: "^" },
+        { label: "x²", secondary: "", action: "function", value: "sq" },
+        { label: "√", secondary: "", action: "function", value: "sqrt" }
+      ],
+      [
+        { label: "7", secondary: "", action: "insert", value: "7" },
+        { label: "8", secondary: "", action: "insert", value: "8" },
+        { label: "9", secondary: "", action: "insert", value: "9" },
+        { label: "÷", secondary: "", action: "insert", value: "/" },
+        { label: "x!", secondary: "", action: "insert", value: "!" }
+      ],
+      [
+        { label: "4", secondary: "", action: "insert", value: "4" },
+        { label: "5", secondary: "", action: "insert", value: "5" },
+        { label: "6", secondary: "", action: "insert", value: "6" },
+        { label: "×", secondary: "", action: "insert", value: "*" },
+        { label: "1/x", secondary: "", action: "function", value: "recip", primaryClass: "small" }
+      ],
+      [
+        { label: "1", secondary: "", action: "insert", value: "1" },
+        { label: "2", secondary: "", action: "insert", value: "2" },
+        { label: "3", secondary: "", action: "insert", value: "3" },
+        { label: "-", secondary: "", action: "insert", value: "-" },
+        { label: "EXP", secondary: "", action: "insert", value: "E", theme: "dark" }
+      ],
+      [
+        { label: "0", secondary: "π", action: "insert", value: "0", shiftValue: "pi" },
+        { label: ".", secondary: "e", action: "insert", value: ".", shiftValue: "e" },
+        { label: "+/-", secondary: "", action: "sign-toggle", primaryClass: "small" },
+        { label: "+", secondary: "", action: "insert", value: "+" },
+        { label: "=", secondary: "", action: "evaluate", theme: "accent" }
+      ]
+    ];
+
+    const expressionEl = document.getElementById("expression");
+    const resultEl = document.getElementById("result");
+    const keypadEl = document.getElementById("keypad");
+    const statusEls = {
+      shift: document.querySelector('[data-status="shift"]'),
+      hyp: document.querySelector('[data-status="hyp"]'),
+      memory: document.querySelector('[data-status="memory"]'),
+      angle: document.querySelector('[data-status="angle"]')
+    };
+
+    const state = {
+      expression: "",
+      answer: 0,
+      memory: 0,
+      shift: false,
+      hyp: false,
+      justEvaluated: false,
+      angleIndex: 0,
+      lastError: false
+    };
+
+    const angleModes = ["DEG", "RAD", "GRAD"];
+    const functionsNeedingMode = new Set(["sin", "cos", "tan", "asin", "acos", "atan"]);
+    const hyperbolicMap = {
+      sin: "sinh",
+      cos: "cosh",
+      tan: "tanh",
+      asin: "asinh",
+      acos: "acosh",
+      atan: "atanh"
+    };
+
+    function renderKeys() {
+      keypadEl.innerHTML = "";
+      keyLayout.flat().forEach((key) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "key";
+        if (key.theme === "dark") button.classList.add("key--dark");
+        if (key.theme === "accent") button.classList.add("key--accent");
+        if (key.theme === "danger") button.classList.add("key--danger");
+        button.dataset.action = key.action;
+        if (key.value) button.dataset.value = key.value;
+        if (key.shiftValue) button.dataset.shiftValue = key.shiftValue;
+
+        const secondary = document.createElement("span");
+        secondary.className = "key__secondary";
+        secondary.textContent = key.secondary || "";
+
+        const primary = document.createElement("span");
+        primary.className = "key__primary";
+        if (key.primaryClass) primary.classList.add(key.primaryClass);
+        primary.textContent = key.label;
+
+        button.appendChild(secondary);
+        button.appendChild(primary);
+        keypadEl.appendChild(button);
+      });
+    }
+
+    function updateDisplay() {
+      expressionEl.textContent = formatExpressionForDisplay(state.expression) || " ";
+      resultEl.textContent = state.lastError ? "Math ERROR" : "0";
+      if (!state.lastError) {
+        resultEl.textContent = state.expression ? previewResult() : formatNumber(state.answer || 0);
+        if (state.justEvaluated && state.expression) {
+          resultEl.textContent = formatNumber(state.answer);
+        }
+      }
+
+      statusEls.shift.classList.toggle("active", state.shift);
+      statusEls.hyp.classList.toggle("active", state.hyp);
+      statusEls.memory.classList.toggle("active", Math.abs(state.memory) > Number.EPSILON);
+      statusEls.angle.textContent = angleModes[state.angleIndex];
+      statusEls.angle.classList.add("active");
+    }
+
+    function previewResult() {
+      try {
+        const value = evaluateExpression(state.expression);
+        return formatNumber(value);
+      } catch {
+        return state.justEvaluated ? formatNumber(state.answer) : "0";
+      }
+    }
+
+    function formatExpressionForDisplay(expression) {
+      return expression
+        .replace(/\*/g, "×")
+        .replace(/\//g, "÷")
+        .replace(/\^/g, "^")
+        .replace(/pi/g, "π");
+    }
+
+    function formatNumber(value) {
+      if (!Number.isFinite(value)) {
+        throw new Error("Invalid number");
+      }
+      if (Object.is(value, -0)) value = 0;
+      if (Math.abs(value) < 1e-12) value = 0;
+      const abs = Math.abs(value);
+      if (abs !== 0 && (abs >= 1e12 || abs < 1e-9)) {
+        return value.toExponential(10).replace("e", "E").replace(/\.?0+E/, "E");
+      }
+      return Number.parseFloat(value.toPrecision(12)).toString();
+    }
+
+    function cycleMode() {
+      state.angleIndex = (state.angleIndex + 1) % angleModes.length;
+      state.shift = false;
+      state.hyp = false;
+      updateDisplay();
+    }
+
+    function clearAll() {
+      state.expression = "";
+      state.lastError = false;
+      state.justEvaluated = false;
+      state.shift = false;
+      state.hyp = false;
+      updateDisplay();
+    }
+
+    function deleteLast() {
+      if (state.justEvaluated || state.lastError) {
+        state.expression = "";
+        state.lastError = false;
+        state.justEvaluated = false;
+        updateDisplay();
+        return;
+      }
+      state.expression = state.expression.slice(0, -1);
+      updateDisplay();
+    }
+
+    function shouldInsertMultiply(nextValue) {
+      if (!state.expression || !nextValue) return false;
+      const previous = state.expression[state.expression.length - 1];
+      const previousIsLetter = /[A-Za-z]/.test(previous);
+      const previousEndsOperand = /[\d)!]/.test(previous) || previousIsLetter;
+      if (!previousEndsOperand) return false;
+
+      if (/^[A-Za-z(]/.test(nextValue)) {
+        return true;
+      }
+
+      if ((previous === ")" || previous === "!" || previousIsLetter) && /^[\d.]/.test(nextValue)) {
+        return true;
+      }
+
+      return false;
+    }
+
+    function insertValue(rawValue) {
+      state.lastError = false;
+
+      if (state.justEvaluated) {
+        if (/^[+\-*/^!]/.test(rawValue)) {
+          state.expression = formatNumber(state.answer);
+        } else {
+          state.expression = "";
+        }
+        state.justEvaluated = false;
+      }
+
+      let value = rawValue;
+      if (state.shift && rawValue === "0") value = "pi";
+      if (state.shift && rawValue === ".") value = "e";
+
+      if (value === "." && !canAppendDecimal()) {
+        consumeOneShotModes();
+        updateDisplay();
+        return;
+      }
+
+      if (value === "E" && !canAppendExponent()) {
+        consumeOneShotModes();
+        updateDisplay();
+        return;
+      }
+
+      if (shouldInsertMultiply(value)) {
+        state.expression += "*";
+      }
+
+      state.expression += value;
+      consumeOneShotModes();
+      updateDisplay();
+    }
+
+    function canAppendDecimal() {
+      const segment = getCurrentNumberSegment();
+      return !segment.includes(".") && !/[A-Za-z)]$/.test(state.expression);
+    }
+
+    function canAppendExponent() {
+      const segment = getCurrentNumberSegment();
+      return /[0-9.]$/.test(state.expression) && !/[Ee]/.test(segment);
+    }
+
+    function getCurrentNumberSegment() {
+      const match = state.expression.match(/([0-9.]+(?:E[+\-]?[0-9]*)?)$/);
+      return match ? match[1] : "";
+    }
+
+    function insertFunction(name) {
+      state.lastError = false;
+      let fnName = name;
+      if (state.hyp && hyperbolicMap[fnName]) {
+        fnName = hyperbolicMap[fnName];
+      }
+
+      if (state.justEvaluated) {
+        state.expression = "";
+        state.justEvaluated = false;
+      }
+
+      if (shouldInsertMultiply(fnName)) {
+        state.expression += "*";
+      }
+
+      state.expression += `${fnName}(`;
+      consumeOneShotModes();
+      updateDisplay();
+    }
+
+    function consumeOneShotModes() {
+      state.shift = false;
+      state.hyp = false;
+    }
+
+    function toggleSign() {
+      state.lastError = false;
+      if (!state.expression) {
+        state.expression = "-";
+        state.justEvaluated = false;
+        updateDisplay();
+        return;
+      }
+
+      if (state.justEvaluated) {
+        state.answer = -state.answer;
+        state.expression = formatNumber(state.answer);
+        state.justEvaluated = true;
+        updateDisplay();
+        return;
+      }
+
+      const bounds = findTrailingOperand(state.expression);
+      if (!bounds) {
+        state.expression += "-";
+        updateDisplay();
+        return;
+      }
+
+      const [start, end] = bounds;
+      const operand = state.expression.slice(start, end);
+      if (operand.startsWith("neg(") && operand.endsWith(")")) {
+        state.expression = state.expression.slice(0, start) + operand.slice(4, -1) + state.expression.slice(end);
+      } else {
+        state.expression = state.expression.slice(0, start) + `neg(${operand})` + state.expression.slice(end);
+      }
+      updateDisplay();
+    }
+
+    function findTrailingOperand(expression) {
+      if (!expression) return null;
+      let end = expression.length;
+      let index = end - 1;
+
+      if (expression[index] === ")") {
+        let depth = 1;
+        index -= 1;
+        while (index >= 0 && depth > 0) {
+          if (expression[index] === ")") depth += 1;
+          if (expression[index] === "(") depth -= 1;
+          index -= 1;
+        }
+        while (index >= 0 && /[A-Za-z]/.test(expression[index])) {
+          index -= 1;
+        }
+        return [index + 1, end];
+      }
+
+      if (expression[index] === "!") {
+        index -= 1;
+        while (index >= 0 && /[\w.)]/.test(expression[index])) {
+          index -= 1;
+        }
+        return [index + 1, end];
+      }
+
+      while (index >= 0 && /[\w.]/.test(expression[index])) {
+        index -= 1;
+      }
+      return index === end - 1 ? null : [index + 1, end];
+    }
+
+    function evaluateCurrentExpression() {
+      if (!state.expression) return;
+      try {
+        const value = evaluateExpression(state.expression);
+        state.answer = value;
+        state.expression = formatNumber(value);
+        state.justEvaluated = true;
+        state.lastError = false;
+      } catch {
+        state.lastError = true;
+        state.justEvaluated = false;
+      }
+      consumeOneShotModes();
+      updateDisplay();
+    }
+
+    function tryResolveCurrentValue() {
+      if (state.lastError) return null;
+      if (!state.expression) return state.answer;
+      try {
+        return evaluateExpression(state.expression);
+      } catch {
+        return null;
+      }
+    }
+
+    function memoryClear() {
+      state.memory = 0;
+      consumeOneShotModes();
+      updateDisplay();
+    }
+
+    function memoryRecall() {
+      state.lastError = false;
+      if (state.justEvaluated) {
+        state.expression = "";
+        state.justEvaluated = false;
+      }
+      const memoryValue = formatNumber(state.memory);
+      const chunk = state.memory < 0 ? `(${memoryValue})` : memoryValue;
+      if (shouldInsertMultiply(chunk)) {
+        state.expression += "*";
+      }
+      state.expression += chunk;
+      consumeOneShotModes();
+      updateDisplay();
+    }
+
+    function memoryAdd(direction) {
+      const value = tryResolveCurrentValue();
+      if (value === null) {
+        state.lastError = true;
+      } else {
+        state.memory += direction * value;
+        state.lastError = false;
+      }
+      consumeOneShotModes();
+      updateDisplay();
+    }
+
+    function handleKeyPress(action, button) {
+      switch (action) {
+        case "toggle-shift":
+          state.shift = !state.shift;
+          state.hyp = false;
+          updateDisplay();
+          return;
+        case "toggle-hyp":
+          state.hyp = !state.hyp;
+          state.shift = false;
+          updateDisplay();
+          return;
+        case "mode":
+          cycleMode();
+          return;
+        case "clear":
+          clearAll();
+          return;
+        case "delete":
+          deleteLast();
+          return;
+        case "memory-clear":
+          memoryClear();
+          return;
+        case "memory-recall":
+          memoryRecall();
+          return;
+        case "memory-add":
+          memoryAdd(1);
+          return;
+        case "memory-subtract":
+          memoryAdd(-1);
+          return;
+        case "sign-toggle":
+          toggleSign();
+          return;
+        case "evaluate":
+          evaluateCurrentExpression();
+          return;
+        case "function":
+          insertFunction(state.shift && button.dataset.shiftValue ? button.dataset.shiftValue : button.dataset.value);
+          return;
+        case "insert":
+          insertValue(state.shift && button.dataset.shiftValue ? button.dataset.shiftValue : button.dataset.value);
+          return;
+        default:
+          return;
+      }
+    }
+
+    function tokenize(input) {
+      const tokens = [];
+      let index = 0;
+
+      while (index < input.length) {
+        const char = input[index];
+        if (/\s/.test(char)) {
+          index += 1;
+          continue;
+        }
+
+        if (/\d|\./.test(char)) {
+          const match = input.slice(index).match(/^\d*\.?\d+(?:E[+\-]?\d+)?/);
+          if (!match) throw new Error("Invalid number");
+          tokens.push({ type: "number", value: Number(match[0]) });
+          index += match[0].length;
+          continue;
+        }
+
+        if (/[A-Za-z]/.test(char)) {
+          const match = input.slice(index).match(/^[A-Za-z][A-Za-z0-9]*/);
+          tokens.push({ type: "identifier", value: match[0] });
+          index += match[0].length;
+          continue;
+        }
+
+        if ("+-*/^()!".includes(char)) {
+          tokens.push({ type: "operator", value: char });
+          index += 1;
+          continue;
+        }
+
+        throw new Error("Unexpected token");
+      }
+
+      return tokens;
+    }
+
+    function evaluateExpression(expression) {
+      const balanced = balanceParentheses(expression);
+      const tokens = tokenize(balanced);
+      let position = 0;
+
+      function peek() {
+        return tokens[position];
+      }
+
+      function consume(expected) {
+        const token = tokens[position];
+        if (!token || (expected && token.value !== expected)) {
+          throw new Error("Syntax error");
+        }
+        position += 1;
+        return token;
+      }
+
+      function parseExpression() {
+        let value = parseTerm();
+        while (peek() && (peek().value === "+" || peek().value === "-")) {
+          const operator = consume().value;
+          const next = parseTerm();
+          value = operator === "+" ? value + next : value - next;
+        }
+        return value;
+      }
+
+      function parseTerm() {
+        let value = parsePower();
+        while (peek() && (peek().value === "*" || peek().value === "/")) {
+          const operator = consume().value;
+          const next = parsePower();
+          if (operator === "*") value *= next;
+          if (operator === "/") value /= next;
+        }
+        return value;
+      }
+
+      function parsePower() {
+        let value = parseUnary();
+        if (peek() && peek().value === "^") {
+          consume("^");
+          value = Math.pow(value, parsePower());
+        }
+        return value;
+      }
+
+      function parseUnary() {
+        if (peek() && (peek().value === "+" || peek().value === "-")) {
+          const operator = consume().value;
+          const value = parseUnary();
+          return operator === "-" ? -value : value;
+        }
+        return parsePostfix();
+      }
+
+      function parsePostfix() {
+        let value = parsePrimary();
+        while (peek() && peek().value === "!") {
+          consume("!");
+          value = factorial(value);
+        }
+        return value;
+      }
+
+      function parsePrimary() {
+        const token = peek();
+        if (!token) throw new Error("Unexpected end");
+
+        if (token.type === "number") {
+          consume();
+          return token.value;
+        }
+
+        if (token.type === "identifier") {
+          consume();
+          if (peek() && peek().value === "(") {
+            consume("(");
+            const argument = parseExpression();
+            consume(")");
+            return applyFunction(token.value, argument);
+          }
+          return resolveIdentifier(token.value);
+        }
+
+        if (token.value === "(") {
+          consume("(");
+          const value = parseExpression();
+          consume(")");
+          return value;
+        }
+
+        throw new Error("Syntax error");
+      }
+
+      const value = parseExpression();
+      if (position !== tokens.length) throw new Error("Trailing tokens");
+      if (!Number.isFinite(value)) throw new Error("Math error");
+      return value;
+    }
+
+    function balanceParentheses(expression) {
+      let balance = 0;
+      let output = expression;
+      for (const char of expression) {
+        if (char === "(") balance += 1;
+        if (char === ")" && balance > 0) balance -= 1;
+      }
+      while (balance > 0) {
+        output += ")";
+        balance -= 1;
+      }
+      return output;
+    }
+
+    function resolveIdentifier(name) {
+      if (name === "pi") return Math.PI;
+      if (name === "e") return Math.E;
+      if (name === "Ans") return state.answer;
+      throw new Error("Unknown identifier");
+    }
+
+    function applyFunction(name, value) {
+      switch (name) {
+        case "sin":
+          return Math.sin(toRadians(value));
+        case "cos":
+          return Math.cos(toRadians(value));
+        case "tan":
+          return Math.tan(toRadians(value));
+        case "asin":
+          return fromRadians(Math.asin(value));
+        case "acos":
+          return fromRadians(Math.acos(value));
+        case "atan":
+          return fromRadians(Math.atan(value));
+        case "sinh":
+          return Math.sinh(value);
+        case "cosh":
+          return Math.cosh(value);
+        case "tanh":
+          return Math.tanh(value);
+        case "asinh":
+          return Math.asinh(value);
+        case "acosh":
+          return Math.acosh(value);
+        case "atanh":
+          return Math.atanh(value);
+        case "log":
+          return Math.log10(value);
+        case "ln":
+          return Math.log(value);
+        case "pow10":
+          return Math.pow(10, value);
+        case "exp":
+          return Math.exp(value);
+        case "sqrt":
+          return Math.sqrt(value);
+        case "sq":
+          return value * value;
+        case "recip":
+          return 1 / value;
+        case "neg":
+          return -value;
+        default:
+          throw new Error("Unknown function");
+      }
+    }
+
+    function toRadians(value) {
+      switch (angleModes[state.angleIndex]) {
+        case "DEG":
+          return value * Math.PI / 180;
+        case "GRAD":
+          return value * Math.PI / 200;
+        default:
+          return value;
+      }
+    }
+
+    function fromRadians(value) {
+      switch (angleModes[state.angleIndex]) {
+        case "DEG":
+          return value * 180 / Math.PI;
+        case "GRAD":
+          return value * 200 / Math.PI;
+        default:
+          return value;
+      }
+    }
+
+    function factorial(value) {
+      if (!Number.isInteger(value) || value < 0 || value > 170) {
+        throw new Error("Factorial out of range");
+      }
+      let result = 1;
+      for (let i = 2; i <= value; i += 1) {
+        result *= i;
+      }
+      return result;
+    }
+
+    keypadEl.addEventListener("click", (event) => {
+      const button = event.target.closest(".key");
+      if (!button) return;
+      handleKeyPress(button.dataset.action, button);
+    });
+
+    window.addEventListener("keydown", (event) => {
+      const keyMap = {
+        Enter: () => evaluateCurrentExpression(),
+        "=": () => evaluateCurrentExpression(),
+        Backspace: () => deleteLast(),
+        Escape: () => clearAll(),
+        Delete: () => clearAll(),
+        "^": () => insertValue("^"),
+        "*": () => insertValue("*"),
+        "/": () => insertValue("/"),
+        "+": () => insertValue("+"),
+        "-": () => insertValue("-"),
+        "(": () => insertValue("("),
+        ")": () => insertValue(")"),
+        ".": () => insertValue("."),
+        "!": () => insertValue("!")
+      };
+
+      if (/^\d$/.test(event.key)) {
+        insertValue(event.key);
+        return;
+      }
+
+      if (keyMap[event.key]) {
+        event.preventDefault();
+        keyMap[event.key]();
+      }
+    });
+
+    renderKeys();
+    updateDisplay();
+  </script>
+</body>
+</html>

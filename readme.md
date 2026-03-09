@@ -4,20 +4,20 @@ This repo contains some toy benchmarks for testing performance of open source co
 
 ## Tasks
 
-### HTML + js Calculator app
+### 1. HTML + js Calculator app
 
-**Task** Implement Casio fx-82MS calculator using HTML and js.
+**Task** Implement Casio fx-82MS calculator using HTML and js to calculator.html.
 
-### HTML + js Snake game
+### 2. HTML + js Snake game
 
 **Task** Implement a snake game a classic nokia style snake game using HTML and js.
 
-### HTML + js Tetris game
+### 3. HTML + js Tetris game
 
-### First person shooter using Three.js
+### 4. First person shooter using Three.js
 
 **Task** Implement first person shooter game using Three.js.
 
-### TODO app with database
+### 5. TODO app with database
 
 **Task** Implement a TODO app which stores data in a mysql database there should be nodejs webserver and html + js frontend.
