@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Nokia Snake</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #1d2b1f;
+        --panel: #d7e0c8;
+        --grid: #c2ccb5;
+        --snake: #2c4a2f;
+        --snake-head: #1a321d;
+        --food: #6b2c2c;
+        --text: #1a1f1a;
+        --muted: #4b5a49;
+        --accent: #0f2b12;
+        --border: #0d160f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+          "Lucida Sans", Arial, sans-serif;
+        background: radial-gradient(circle at 20% 10%, #2b3b2e, var(--bg));
+        color: var(--text);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+
+      .shell {
+        width: min(520px, 95vw);
+        background: linear-gradient(180deg, #e8efda 0%, var(--panel) 100%);
+        border: 4px solid var(--border);
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 2px solid var(--border);
+        padding-bottom: 10px;
+        margin-bottom: 14px;
+      }
+
+      .title {
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+      }
+
+      .score {
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+
+      .board-wrap {
+        display: grid;
+        place-items: center;
+        background: linear-gradient(180deg, #e6edd8 0%, #cfd8bf 100%);
+        border-radius: 12px;
+        padding: 12px;
+        border: 2px solid var(--border);
+      }
+
+      canvas {
+        background: var(--grid);
+        border: 4px solid var(--accent);
+        border-radius: 8px;
+        image-rendering: pixelated;
+      }
+
+      .footer {
+        margin-top: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+
+      .chip {
+        border: 1px solid var(--border);
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #eff4e6;
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 0.8rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .overlay {
+        position: absolute;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 12px;
+        background: rgba(10, 18, 11, 0.65);
+        color: #f4f6ee;
+        border-radius: 12px;
+      }
+
+      .overlay.visible {
+        display: flex;
+      }
+
+      .overlay-card {
+        background: rgba(13, 22, 15, 0.92);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        padding: 18px 22px;
+        border-radius: 12px;
+      }
+
+      .overlay-card h2 {
+        margin: 0 0 8px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .overlay-card p {
+        margin: 0;
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.78);
+      }
+
+      .game-area {
+        position: relative;
+      }
+
+      @media (max-width: 480px) {
+        .shell {
+          padding: 14px;
+        }
+
+        .footer {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="header">
+        <div class="title">Nokia Snake</div>
+        <div class="score">Score: <span id="score">0</span></div>
+      </header>
+
+      <section class="board-wrap">
+        <div class="game-area">
+          <canvas id="board" width="360" height="360" aria-label="Snake game board">
+          </canvas>
+          <div class="overlay" id="overlay" role="status" aria-live="polite">
+            <div class="overlay-card">
+              <h2 id="overlay-title">Paused</h2>
+              <p id="overlay-text">Press Space to start.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="chip">Arrows / WASD</div>
+        <div class="chip">Space: Start / Pause</div>
+        <div class="chip">R: Restart</div>
+      </footer>
+    </main>
+
+    <script>
+      (function () {
+        const canvas = document.getElementById("board");
+        const ctx = canvas.getContext("2d");
+        const scoreEl = document.getElementById("score");
+        const overlay = document.getElementById("overlay");
+        const overlayTitle = document.getElementById("overlay-title");
+        const overlayText = document.getElementById("overlay-text");
+
+        const gridSize = 18;
+        const tileSize = canvas.width / gridSize;
+        const baseSpeed = 160;
+        const minSpeed = 70;
+        const speedStep = 6;
+
+        let snake;
+        let direction;
+        let queuedDirection;
+        let food;
+        let score;
+        let gameLoopId;
+        let lastTick;
+        let running = false;
+        let gameOver = false;
+
+        function resetGame() {
+          snake = [
+            { x: 8, y: 9 },
+            { x: 7, y: 9 },
+            { x: 6, y: 9 },
+          ];
+          direction = { x: 1, y: 0 };
+          queuedDirection = direction;
+          food = placeFood();
+          score = 0;
+          updateScore();
+          running = false;
+          gameOver = false;
+          lastTick = 0;
+          stopLoop();
+          showOverlay("Ready", "Press Space to start.");
+          draw();
+        }
+
+        function updateScore() {
+          scoreEl.textContent = String(score);
+        }
+
+        function showOverlay(title, text) {
+          overlayTitle.textContent = title;
+          overlayText.textContent = text;
+          overlay.classList.add("visible");
+        }
+
+        function hideOverlay() {
+          overlay.classList.remove("visible");
+        }
+
+        function startLoop() {
+          if (gameLoopId) {
+            return;
+          }
+          running = true;
+          hideOverlay();
+          lastTick = performance.now();
+          gameLoopId = requestAnimationFrame(loop);
+        }
+
+        function stopLoop() {
+          if (gameLoopId) {
+            cancelAnimationFrame(gameLoopId);
+            gameLoopId = null;
+          }
+        }
+
+        function loop(timestamp) {
+          if (!running) {
+            gameLoopId = requestAnimationFrame(loop);
+            return;
+          }
+
+          const elapsed = timestamp - lastTick;
+          const speed = Math.max(minSpeed, baseSpeed - score * speedStep);
+          if (elapsed >= speed) {
+            lastTick = timestamp;
+            step();
+          }
+
+          gameLoopId = requestAnimationFrame(loop);
+        }
+
+        function step() {
+          direction = queuedDirection;
+          const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+
+          if (head.x < 0 || head.y < 0 || head.x >= gridSize || head.y >= gridSize) {
+            endGame();
+            return;
+          }
+
+          if (snake.some((segment) => segment.x === head.x && segment.y === head.y)) {
+            endGame();
+            return;
+          }
+
+          snake.unshift(head);
+
+          if (head.x === food.x && head.y === food.y) {
+            score += 1;
+            updateScore();
+            food = placeFood();
+          } else {
+            snake.pop();
+          }
+
+          draw();
+        }
+
+        function endGame() {
+          running = false;
+          gameOver = true;
+          showOverlay("Game Over", "Press R to restart.");
+        }
+
+        function placeFood() {
+          let position;
+          do {
+            position = {
+              x: Math.floor(Math.random() * gridSize),
+              y: Math.floor(Math.random() * gridSize),
+            };
+          } while (snake && snake.some((segment) => segment.x === position.x && segment.y === position.y));
+          return position;
+        }
+
+        function draw() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          drawGrid();
+          drawFood();
+          drawSnake();
+        }
+
+        function drawGrid() {
+          ctx.strokeStyle = "#b9c2aa";
+          ctx.lineWidth = 1;
+          for (let i = 0; i <= gridSize; i += 1) {
+            const pos = i * tileSize;
+            ctx.beginPath();
+            ctx.moveTo(pos, 0);
+            ctx.lineTo(pos, canvas.height);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(0, pos);
+            ctx.lineTo(canvas.width, pos);
+            ctx.stroke();
+          }
+        }
+
+        function drawSnake() {
+          snake.forEach((segment, index) => {
+            ctx.fillStyle = index === 0 ? "#1a321d" : "#2c4a2f";
+            ctx.fillRect(
+              segment.x * tileSize + 1,
+              segment.y * tileSize + 1,
+              tileSize - 2,
+              tileSize - 2
+            );
+          });
+        }
+
+        function drawFood() {
+          ctx.fillStyle = "#6b2c2c";
+          ctx.fillRect(
+            food.x * tileSize + 3,
+            food.y * tileSize + 3,
+            tileSize - 6,
+            tileSize - 6
+          );
+        }
+
+        function setDirection(next) {
+          if (!running && !gameOver) {
+            startLoop();
+          }
+
+          const isOpposite =
+            next.x === -direction.x && next.y === -direction.y;
+          if (isOpposite) {
+            return;
+          }
+          queuedDirection = next;
+        }
+
+        function togglePause() {
+          if (gameOver) {
+            return;
+          }
+          running = !running;
+          if (running) {
+            hideOverlay();
+          } else {
+            showOverlay("Paused", "Press Space to resume.");
+          }
+        }
+
+        function handleKey(event) {
+          const key = event.key.toLowerCase();
+          if (["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d", " "].includes(key)) {
+            event.preventDefault();
+          }
+
+          if (key === " " || key === "space") {
+            if (!running && !gameOver) {
+              startLoop();
+              return;
+            }
+            togglePause();
+            return;
+          }
+
+          if (key === "r") {
+            resetGame();
+            return;
+          }
+
+          switch (key) {
+            case "arrowup":
+            case "w":
+              setDirection({ x: 0, y: -1 });
+              break;
+            case "arrowdown":
+            case "s":
+              setDirection({ x: 0, y: 1 });
+              break;
+            case "arrowleft":
+            case "a":
+              setDirection({ x: -1, y: 0 });
+              break;
+            case "arrowright":
+            case "d":
+              setDirection({ x: 1, y: 0 });
+              break;
+            default:
+              break;
+          }
+        }
+
+        window.addEventListener("keydown", handleKey);
+        resetGame();
+      })();
+    </script>
+  </body>
+</html>

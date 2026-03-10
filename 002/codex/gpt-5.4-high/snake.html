@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nokia Snake</title>
+  <style>
+    :root {
+      --screen-bg: #9bbc0f;
+      --screen-mid: #7b8f13;
+      --screen-dark: #2f3e1d;
+      --screen-darker: #18200f;
+      --bezel: #54634c;
+      --bezel-shadow: #2a3126;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at top, #4d5546 0%, #1d221b 58%, #10130f 100%);
+      color: var(--screen-darker);
+      font-family: "Lucida Console", "Courier New", monospace;
+    }
+
+    .console {
+      width: min(92vw, 520px);
+      padding: 22px;
+      border-radius: 28px;
+      background:
+        linear-gradient(145deg, #77866c 0%, #596553 45%, #41493c 100%);
+      box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.18),
+        inset 0 -10px 18px rgba(0, 0, 0, 0.22),
+        0 24px 48px rgba(0, 0, 0, 0.38);
+      border: 3px solid var(--bezel-shadow);
+    }
+
+    .brand {
+      margin: 0 0 12px;
+      text-align: center;
+      font-size: 0.95rem;
+      letter-spacing: 0.38rem;
+      color: #d8dfd0;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    .screen {
+      padding: 16px;
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 18%),
+        linear-gradient(180deg, #a6bf16 0%, var(--screen-bg) 100%);
+      border: 10px solid var(--bezel);
+      box-shadow:
+        inset 0 0 0 2px rgba(24, 32, 15, 0.18),
+        inset 0 18px 28px rgba(255, 255, 255, 0.08),
+        inset 0 -12px 20px rgba(24, 32, 15, 0.22);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .screen::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(24, 32, 15, 0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(24, 32, 15, 0.055) 1px, transparent 1px);
+      background-size: 6px 6px;
+      mix-blend-mode: multiply;
+      opacity: 0.45;
+    }
+
+    .hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.08rem;
+      text-transform: uppercase;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      image-rendering: pixelated;
+      border: 3px solid rgba(24, 32, 15, 0.5);
+      background: rgba(155, 188, 15, 0.4);
+      box-shadow: inset 0 0 0 1px rgba(24, 32, 15, 0.18);
+    }
+
+    .footer {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.85rem;
+      line-height: 1.45;
+      text-transform: uppercase;
+    }
+
+    .footer span {
+      display: block;
+    }
+
+    @media (max-width: 480px) {
+      .console {
+        padding: 16px;
+      }
+
+      .screen {
+        padding: 12px;
+        border-width: 8px;
+      }
+
+      .hud,
+      .footer {
+        font-size: 0.74rem;
+      }
+
+      .brand {
+        letter-spacing: 0.24rem;
+        font-size: 0.82rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="console" aria-label="Nokia-style Snake console">
+    <p class="brand">NOKIA SNAKE</p>
+    <section class="screen">
+      <div class="hud" aria-live="polite">
+        <span id="score">Score: 0</span>
+        <span id="status">Press an arrow key</span>
+      </div>
+      <canvas id="game" width="360" height="360" aria-label="Snake game board"></canvas>
+      <div class="footer">
+        <span>Arrows or WASD to move</span>
+        <span>Space, Enter, or R to restart</span>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const scoreLabel = document.getElementById("score");
+    const statusLabel = document.getElementById("status");
+
+    const gridSize = 18;
+    const cellSize = canvas.width / gridSize;
+    const tickMs = 120;
+    const directions = {
+      ArrowUp: { x: 0, y: -1 },
+      ArrowDown: { x: 0, y: 1 },
+      ArrowLeft: { x: -1, y: 0 },
+      ArrowRight: { x: 1, y: 0 },
+      w: { x: 0, y: -1 },
+      s: { x: 0, y: 1 },
+      a: { x: -1, y: 0 },
+      d: { x: 1, y: 0 }
+    };
+
+    let snake;
+    let direction;
+    let queuedDirection;
+    let food;
+    let score;
+    let state;
+    let loopId;
+
+    function resetGame() {
+      snake = [
+        { x: 8, y: 9 },
+        { x: 7, y: 9 },
+        { x: 6, y: 9 },
+        { x: 5, y: 9 }
+      ];
+      direction = { x: 1, y: 0 };
+      queuedDirection = { x: 1, y: 0 };
+      food = placeFood();
+      score = 0;
+      state = "idle";
+      scoreLabel.textContent = "Score: 0";
+      statusLabel.textContent = "Press an arrow key";
+      clearInterval(loopId);
+      loopId = null;
+      draw();
+    }
+
+    function startGame() {
+      if (state === "running") {
+        return;
+      }
+      state = "running";
+      statusLabel.textContent = "Collect the pixel";
+      draw();
+      clearInterval(loopId);
+      loopId = setInterval(step, tickMs);
+    }
+
+    function restartGame() {
+      resetGame();
+      startGame();
+    }
+
+    function placeFood() {
+      let candidate;
+      do {
+        candidate = {
+          x: Math.floor(Math.random() * gridSize),
+          y: Math.floor(Math.random() * gridSize)
+        };
+      } while (snake && snake.some((segment) => segment.x === candidate.x && segment.y === candidate.y));
+      return candidate;
+    }
+
+    function isOpposite(next, current) {
+      return next.x === -current.x && next.y === -current.y;
+    }
+
+    function updateDirection(nextDirection) {
+      if (!nextDirection) {
+        return;
+      }
+      const referenceDirection = state === "running" ? queuedDirection : direction;
+      if (snake.length > 1 && isOpposite(nextDirection, referenceDirection)) {
+        return;
+      }
+      queuedDirection = nextDirection;
+    }
+
+    function step() {
+      direction = queuedDirection;
+      const head = {
+        x: snake[0].x + direction.x,
+        y: snake[0].y + direction.y
+      };
+      const willEat = head.x === food.x && head.y === food.y;
+
+      const hitWall =
+        head.x < 0 ||
+        head.x >= gridSize ||
+        head.y < 0 ||
+        head.y >= gridSize;
+
+      const bodyToCheck = willEat ? snake : snake.slice(0, -1);
+      const hitSelf = bodyToCheck.some((segment) => segment.x === head.x && segment.y === head.y);
+
+      if (hitWall || hitSelf) {
+        state = "gameover";
+        statusLabel.textContent = "Game over";
+        clearInterval(loopId);
+        loopId = null;
+        draw();
+        return;
+      }
+
+      snake.unshift(head);
+
+      if (willEat) {
+        score += 10;
+        scoreLabel.textContent = `Score: ${score}`;
+        statusLabel.textContent = "Nice catch";
+        food = placeFood();
+      } else {
+        statusLabel.textContent = "Collect the pixel";
+        snake.pop();
+      }
+
+      draw();
+    }
+
+    function drawCell(x, y, fillStyle, inset = 2) {
+      const px = x * cellSize;
+      const py = y * cellSize;
+      ctx.fillStyle = fillStyle;
+      ctx.fillRect(px + inset, py + inset, cellSize - inset * 2, cellSize - inset * 2);
+    }
+
+    function drawBoard() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "rgba(123, 143, 19, 0.22)";
+      for (let y = 0; y < gridSize; y += 1) {
+        for (let x = 0; x < gridSize; x += 1) {
+          ctx.fillRect(x * cellSize + 7, y * cellSize + 7, 2, 2);
+        }
+      }
+    }
+
+    function drawOverlay(title, subtitle) {
+      ctx.fillStyle = "rgba(24, 32, 15, 0.8)";
+      ctx.fillRect(28, 128, canvas.width - 56, 104);
+      ctx.strokeStyle = "#9bbc0f";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(28, 128, canvas.width - 56, 104);
+      ctx.fillStyle = "#dce8a0";
+      ctx.textAlign = "center";
+      ctx.font = 'bold 26px "Lucida Console", monospace';
+      ctx.fillText(title, canvas.width / 2, 166);
+      ctx.font = 'bold 14px "Lucida Console", monospace';
+      ctx.fillText(subtitle, canvas.width / 2, 198);
+    }
+
+    function draw() {
+      drawBoard();
+      drawCell(food.x, food.y, "#2f3e1d", 4);
+
+      snake.forEach((segment, index) => {
+        const shade = index === 0 ? "#18200f" : "#2f3e1d";
+        drawCell(segment.x, segment.y, shade, 3);
+      });
+
+      if (state === "idle") {
+        drawOverlay("SNAKE", "PRESS A DIRECTION");
+      } else if (state === "gameover") {
+        drawOverlay("GAME OVER", "SPACE / ENTER / R");
+      }
+    }
+
+    document.addEventListener("keydown", (event) => {
+      const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+      const nextDirection = directions[key];
+
+      if (nextDirection) {
+        event.preventDefault();
+        updateDirection(nextDirection);
+        if (state === "idle") {
+          startGame();
+        }
+        return;
+      }
+
+      if (key === " " || key === "Enter" || key === "r") {
+        event.preventDefault();
+        if (state === "gameover") {
+          restartGame();
+        } else if (state === "idle") {
+          startGame();
+        }
+      }
+    });
+
+    resetGame();
+  </script>
+</body>
+</html>
