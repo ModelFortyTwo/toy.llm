@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casio fx-82MS Clone</title>
+    <style>
+        body {
+            background-color: #2c3e50;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .calculator {
+            background-color: #1a1a1a;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 320px;
+        }
+
+        .screen {
+            background-color: #9caf88;
+            color: #2c3e50;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 24px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: right;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .keys {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 5px;
+            padding: 15px 0;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #ccc;
+            transition: all 0.1s;
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #ccc;
+        }
+
+        button.function {
+            background-color: #d4d4d4;
+            color: #333;
+        }
+
+        button.operator {
+            background-color: #e67e22;
+            color: white;
+            box-shadow: 0 4px 0 #d35400;
+        }
+
+        button.operator:active {
+            box-shadow: 0 0 0 #d35400;
+        }
+
+        button.equals {
+            background-color: #27ae60;
+            color: white;
+            box-shadow: 0 4px 0 #2ecc71;
+        }
+
+        button.equals:active {
+            box-shadow: 0 0 0 #2ecc71;
+        }
+
+        button.wide {
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+
+<div class="calculator">
+    <div class="screen" id="display">0</div>
+    <div class="keys">
+        <!-- Row 1 -->
+        <button class="function" onclick="clearDisplay()">AC</button>
+        <button class="function" onclick="toggleSign()">+/-</button>
+        <button class="function" onclick="inputPercent()">%</button>
+        <button class="function" onclick="inputPi()">π</button>
+        <button class="function" onclick="inputE()">e</button>
+
+        <!-- Row 2 -->
+        <button class="function" onclick="inputFunc('sin')">sin</button>
+        <button class="function" onclick="inputFunc('cos')">cos</button>
+        <button class="function" onclick="inputFunc('tan')">tan</button>
+        <button class="function" onclick="inputFunc('log')">log</button>
+        <button class="function" onclick="inputFunc('ln')">ln</button>
+
+        <!-- Row 3 -->
+        <button class="function" onclick="inputParen('(')">(</button>
+        <button class="function" onclick="inputParen(')')">)</button>
+        <button class="function" onclick="inputExp()">10^x</button>
+        <button class="function" onclick="inputSq()">x^2</button>
+        <button class="function" onclick="inputSqrt()">√</button>
+
+        <!-- Row 4 -->
+        <button onclick="inputDigit('7')">7</button>
+        <button onclick="inputDigit('8')">8</button>
+        <button onclick="inputDigit('9')">9</button>
+        <button class="operator" onclick="inputOperator('/')">÷</button>
+        <button class="function" onclick="inputOperator('^')">^</button>
+
+        <!-- Row 5 -->
+        <button onclick="inputDigit('4')">4</button>
+        <button onclick="inputDigit('5')">5</button>
+        <button onclick="inputDigit('6')">6</button>
+        <button class="operator" onclick="inputOperator('*')">×</button>
+        <button class="function" onclick="inputOperator('!')">n!</button>
+
+        <!-- Row 6 -->
+        <button onclick="inputDigit('1')">1</button>
+        <button onclick="inputDigit('2')">2</button>
+        <button onclick="inputDigit('3')">3</button>
+        <button class="operator" onclick="inputOperator('-')">−</button>
+        <button class="function" onclick="inputInverse()">1/x</button>
+
+        <!-- Row 7 -->
+        <button class="wide" onclick="inputDigit('0')">0</button>
+        <button onclick="inputDigit('.')">.</button>
+        <button class="operator" onclick="inputOperator('+')">+</button>
+        <button class="equals" onclick="calculate()">=</button>
+    </div>
+</div>
+
+<script>
+    let displayValue = '0';
+    let calculationString = '';
+    let lastResult = null;
+
+    function updateDisplay() {
+        const display = document.getElementById('display');
+        display.textContent = displayValue;
+    }
+
+    function clearDisplay() {
+        displayValue = '0';
+        calculationString = '';
+        lastResult = null;
+        updateDisplay();
+    }
+
+    function inputDigit(digit) {
+        if (displayValue === '0' && digit !== '.') {
+            displayValue = digit;
+        } else {
+            displayValue += digit;
+        }
+        calculationString += digit;
+        updateDisplay();
+    }
+
+    function inputOperator(op) {
+        calculationString += op;
+        displayValue = '0'; // Reset display for next number
+        updateDisplay();
+    }
+
+    function inputParen(paren) {
+        calculationString += paren;
+        displayValue = paren; // Show parenthesis on display momentarily
+        updateDisplay();
+        displayValue = '0'; // Reset display for next number
+    }
+
+    function inputFunc(func) {
+        calculationString += func + '(';
+        displayValue = func + '(';
+        updateDisplay();
+        displayValue = '0'; // Reset display for next number
+    }
+
+    function inputSqrt() {
+        calculationString += 'sqrt(';
+        displayValue = '√';
+        updateDisplay();
+        displayValue = '0';
+    }
+
+    function inputSq() {
+        calculationString += '**2';
+        displayValue = '^2';
+        updateDisplay();
+        displayValue = '0';
+    }
+
+    function inputExp() {
+        calculationString += '10**';
+        displayValue = '10^';
+        updateDisplay();
+    }
+
+    function inputPi() {
+        calculationString += 'Math.PI';
+        displayValue = 'π';
+        updateDisplay();
+        displayValue = '0';
+    }
+
+    function inputE() {
+        calculationString += 'Math.E';
+        displayValue = 'e';
+        updateDisplay();
+        displayValue = '0';
+    }
+
+    function inputPercent() {
+        calculationString += '/100';
+        displayValue = '%';
+        updateDisplay();
+        displayValue = '0';
+    }
+
+    function inputInverse() {
+        calculationString += '1/(' + (lastResult !== null ? lastResult : displayValue) + ')';
+        calculate();
+    }
+
+    function inputFactorial() {
+        const val = parseFloat(calculationString.slice(-1) || displayValue);
+        calculationString += 'factorial(' + val + ')';
+        calculate();
+    }
+
+    function toggleSign() {
+        if (displayValue.startsWith('-')) {
+            displayValue = displayValue.substring(1);
+            calculationString = calculationString.replace('-', '');
+        } else {
+            displayValue = '-' + displayValue;
+            calculationString = '-' + calculationString;
+        }
+        updateDisplay();
+    }
+
+    function factorial(n) {
+        if (n === 0 || n === 1) return 1;
+        let result = 1;
+        for (let i = 2; i <= n; i++) result *= i;
+        return result;
+    }
+
+    // Replace operators and functions for evaluation
+    function prepareExpression(expr) {
+        let prepared = expr
+            .replace(/÷/g, '/')
+            .replace(/×/g, '*')
+            .replace(/−/g, '-')
+            .replace(/sin/g, 'Math.sin')
+            .replace(/cos/g, 'Math.cos')
+            .replace(/tan/g, 'Math.tan')
+            .replace(/log/g, 'Math.log10')
+            .replace(/ln/g, 'Math.log')
+            .replace(/sqrt/g, 'Math.sqrt')
+            .replace(/\^/g, '**')
+            .replace(/π/g, 'Math.PI')
+            .replace(/e(?![xp])/g, 'Math.E'); // Avoid replacing 'e' in '10e' etc (basic)
+
+        return prepared;
+    }
+
+    function calculate() {
+        try {
+            const expr = prepareExpression(calculationString);
+            // Handle factorial
+            const result = eval(expr.replace(/(\d+)!/, (match, p1) => factorial(parseInt(p1))));
+            lastResult = result;
+            displayValue = String(result);
+            calculationString = String(result);
+            updateDisplay();
+        } catch (error) {
+            displayValue = 'Error';
+            updateDisplay();
+            setTimeout(() => {
+                displayValue = '0';
+                calculationString = '';
+                updateDisplay();
+            }, 1000);
+        }
+    }
+
+    // Handle keyboard input
+    document.addEventListener('keydown', (event) => {
+        const key = event.key;
+        if (/\d/.test(key)) inputDigit(key);
+        else if (key === '.') inputDigit('.');
+        else if (key === '+') inputOperator('+');
+        else if (key === '-') inputOperator('-');
+        else if (key === '*') inputOperator('*');
+        else if (key === '/') inputOperator('/');
+        else if (key === 'Enter' || key === '=') calculate();
+        else if (key === 'Escape' || key === 'c' || key === 'C') clearDisplay();
+        else if (key === 'Backspace') {
+            calculationString = calculationString.slice(0, -1);
+            displayValue = calculationString.slice(-1) || '0';
+            updateDisplay();
+        }
+    });
+</script>
+</body>
+</html>

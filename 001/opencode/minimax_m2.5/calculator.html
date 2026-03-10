@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casio fx-82MS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .calculator {
+            background: linear-gradient(145deg, #2d2d3a, #1e1e28);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            width: 360px;
+        }
+
+        .brand {
+            text-align: center;
+            color: #8b8b9a;
+            font-size: 14px;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .model {
+            text-align: center;
+            color: #c0c0c8;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            letter-spacing: 3px;
+        }
+
+        .display-container {
+            background: #98b98b;
+            border-radius: 8px;
+            padding: 15px 10px;
+            margin-bottom: 15px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .indicator {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #333;
+            margin-bottom: 5px;
+            height: 12px;
+        }
+
+        .display {
+            background: #c8dcc8;
+            color: #333;
+            font-family: 'Courier New', monospace;
+            font-size: 28px;
+            text-align: right;
+            padding: 10px;
+            border-radius: 5px;
+            min-height: 50px;
+            word-break: break-all;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+
+        .btn {
+            padding: 12px 5px;
+            font-size: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.1s;
+            font-weight: bold;
+            box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        .btn-fn {
+            background: #a8a8b8;
+            color: #333;
+        }
+
+        .btn-num {
+            background: #e8e8f0;
+            color: #333;
+        }
+
+        .btn-op {
+            background: #f0a030;
+            color: #fff;
+        }
+
+        .btn-eq {
+            background: #30a050;
+            color: #fff;
+        }
+
+        .btn-clear {
+            background: #d05050;
+            color: #fff;
+        }
+
+        .btn-shift {
+            background: #c08050;
+            color: #fff;
+        }
+
+        .btn-modes {
+            background: #5080c0;
+            color: #fff;
+        }
+
+        .special-display {
+            background: #d0d8e0;
+            color: #333;
+            font-size: 10px;
+            padding: 5px;
+            text-align: right;
+            border-radius: 3px;
+            min-height: 18px;
+            margin-bottom: 5px;
+        }
+
+        .shift-active {
+            background: #e08050 !important;
+        }
+
+        .hyp-active {
+            background: #8050a0 !important;
+        }
+
+        .mode-active {
+            background: #5080c0 !important;
+            color: #fff !important;
+        }
+
+        .btn-shift-active {
+            background: #e08050;
+            color: #fff;
+        }
+
+        .btn-hyp {
+            background: #a070b0;
+            color: #fff;
+        }
+
+        .memory-indicators {
+            display: flex;
+            gap: 10px;
+            font-size: 10px;
+            color: #333;
+        }
+
+        .memory-indicators span {
+            opacity: 0;
+        }
+
+        .memory-indicators span.active {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="brand">CASIO</div>
+        <div class="model">fx-82MS</div>
+        
+        <div class="display-container">
+            <div class="indicator">
+                <div class="memory-indicators">
+                    <span id="memory">M</span>
+                </div>
+                <span id="mode-indicator"></span>
+                <span id="shift-indicator"></span>
+            </div>
+            <div class="special-display" id="special-display"></div>
+            <div class="display" id="display">0</div>
+        </div>
+
+        <div class="buttons">
+            <!-- Row 1 -->
+            <button class="btn btn-fn" onclick="toggleShift()" id="shift-btn">SHIFT</button>
+            <button class="btn btn-fn" onclick="toggleHyp()">HYP</button>
+            <button class="btn btn-fn" onclick="setMode('DEG')">MODE</button>
+            <button class="btn btn-fn" onclick="pressFunc('sin')" id="btn-sin">sin</button>
+            <button class="btn btn-fn" onclick="pressFunc('cos')" id="btn-cos">cos</button>
+            <button class="btn btn-fn" onclick="pressFunc('tan')" id="btn-tan">tan</button>
+            <button class="btn btn-fn" onclick="pressFunc('ln')" id="btn-ln">ln</button>
+
+            <!-- Row 2 -->
+            <button class="btn btn-fn" onclick="pressFunc('x-1')" id="btn-x-1">x⁻¹</button>
+            <button class="btn btn-fn" onclick="pressFunc('ab/c')">aʙ/c</button>
+            <button class="btn btn-fn" onclick="pressFunc('nCr')">nCr</button>
+            <button class="btn btn-fn" onclick="pressFunc('pol')">pol(</button>
+            <button class="btn btn-fn" onclick="pressFunc('comb')">comb</button>
+            <button class="btn btn-fn" onclick="pressFunc('sqrt')" id="btn-sqrt">√</button>
+            <button class="btn btn-fn" onclick="pressFunc('cube')" id="btn-cube">∛</button>
+
+            <!-- Row 3 -->
+            <button class="btn btn-fn" onclick="pressFunc('log')" id="btn-log">log</button>
+            <button class="btn btn-fn" onclick="pressFunc('x2')" id="btn-x2">x²</button>
+            <button class="btn btn-fn" onclick="pressFunc('x3')" id="btn-x3">x³</button>
+            <button class="btn btn-fn" onclick="pressFunc('power')">xʸ</button>
+            <button class="btn btn-fn" onclick="pressFunc('fact')" id="btn-fact">x!</button>
+            <button class="btn btn-fn" onclick="pressNumber('(')">(</button>
+            <button class="btn btn-fn" onclick="pressNumber(')')">)</button>
+
+            <!-- Row 4 -->
+            <button class="btn btn-fn" onclick="pressFunc('exp')" id="btn-exp">EXP</button>
+            <button class="btn btn-fn" onclick="pressFunc('abs')" id="btn-abs">Abs</button>
+            <button class="btn btn-num" onclick="pressNumber('7')">7</button>
+            <button class="btn btn-num" onclick="pressNumber('8')">8</button>
+            <button class="btn btn-num" onclick="pressNumber('9')">9</button>
+            <button class="btn btn-clear" onclick="pressClear()">DEL</button>
+            <button class="btn btn-clear" onclick="pressAllClear()">AC</button>
+
+            <!-- Row 5 -->
+            <button class="btn btn-fn" onclick="setMode('RAD')">RAD</button>
+            <button class="btn btn-fn" onclick="setMode('GRA')">GRA</button>
+            <button class="btn btn-num" onclick="pressNumber('4')">4</button>
+            <button class="btn btn-num" onclick="pressNumber('5')">5</button>
+            <button class="btn btn-num" onclick="pressNumber('6')">6</button>
+            <button class="btn btn-op" onclick="pressOperator('*')">×</button>
+            <button class="btn btn-op" onclick="pressOperator('/')">÷</button>
+
+            <!-- Row 6 -->
+            <button class="btn btn-fn" onclick="memoryAdd()">M+</button>
+            <button class="btn btn-fn" onclick="memorySub()">M-</button>
+            <button class="btn btn-num" onclick="pressNumber('1')">1</button>
+            <button class="btn btn-num" onclick="pressNumber('2')">2</button>
+            <button class="btn btn-num" onclick="pressNumber('3')">3</button>
+            <button class="btn btn-op" onclick="pressOperator('+')">+</button>
+            <button class="btn btn-op" onclick="pressOperator('-')">-</button>
+
+            <!-- Row 7 -->
+            <button class="btn btn-fn" onclick="memoryRecall()">MR</button>
+            <button class="btn btn-fn" onclick="memoryClear()">MC</button>
+            <button class="btn btn-num" onclick="pressNumber('0')">0</button>
+            <button class="btn btn-num" onclick="pressNumber('.')">.</button>
+            <button class="btn btn-fn" onclick="pressFunc('negate')">(-)</button>
+            <button class="btn btn-eq" onclick="calculate()">=</button>
+            <button class="btn btn-fn" onclick="pressFunc('percent')">%</button>
+        </div>
+    </div>
+
+    <script>
+        let display = '0';
+        let expression = '';
+        let memory = 0;
+        let isShift = false;
+        let isHyp = false;
+        let mode = 'DEG';
+        let pendingOp = null;
+        let pendingValue = null;
+        let newEntry = true;
+
+        const displayEl = document.getElementById('display');
+        const specialDisplayEl = document.getElementById('special-display');
+        const shiftIndicator = document.getElementById('shift-indicator');
+        const modeIndicator = document.getElementById('mode-indicator');
+        const memoryIndicator = document.getElementById('memory');
+        const shiftBtn = document.getElementById('shift-btn');
+
+        function updateDisplay() {
+            if (expression !== '') {
+                displayEl.textContent = expression + (display !== '0' ? display : '');
+            } else {
+                displayEl.textContent = display;
+            }
+        }
+
+        function updateIndicators() {
+            shiftIndicator.textContent = isShift ? 'S' : '';
+            modeIndicator.textContent = mode;
+            memoryIndicator.classList.toggle('active', memory !== 0);
+            shiftBtn.classList.toggle('btn-shift-active', isShift);
+        }
+
+        function pressNumber(num) {
+            if (newEntry) {
+                display = num === '.' ? '0.' : num;
+                newEntry = false;
+            } else {
+                if (num === '.' && display.includes('.')) return;
+                display = display === '0' && num !== '.' ? num : display + num;
+            }
+            updateDisplay();
+        }
+
+        function pressOperator(op) {
+            if (pendingOp && !newEntry) {
+                calculate();
+            }
+            pendingValue = parseFloat(display);
+            pendingOp = op;
+            expression = display + ' ' + op + ' ';
+            newEntry = true;
+            updateDisplay();
+        }
+
+        function calculate() {
+            if (pendingOp === null || pendingValue === null) return;
+            
+            const currentValue = parseFloat(display);
+            let result;
+            
+            switch (pendingOp) {
+                case '+': result = pendingValue + currentValue; break;
+                case '-': result = pendingValue - currentValue; break;
+                case '*': result = pendingValue * currentValue; break;
+                case '/': result = currentValue !== 0 ? pendingValue / currentValue : 'Error'; break;
+                case 'power': result = Math.pow(pendingValue, currentValue); break;
+            }
+            
+            if (result === 'Error') {
+                display = 'Error';
+                specialDisplayEl.textContent = 'Math Error';
+            } else {
+                display = formatResult(result);
+            }
+            
+            expression = '';
+            pendingOp = null;
+            pendingValue = null;
+            newEntry = true;
+            updateDisplay();
+        }
+
+        function formatResult(num) {
+            if (Number.isInteger(num) && Math.abs(num) < 1e12) {
+                return num.toString();
+            }
+            const result = parseFloat(num.toPrecision(12));
+            return result.toString();
+        }
+
+        function pressFunc(func) {
+            let value = parseFloat(display);
+            let result;
+            const shiftFunc = isShift;
+            
+            if (shiftFunc) {
+                toggleShift();
+            }
+
+            switch (func) {
+                case 'sin':
+                    result = mode === 'DEG' ? Math.sin(value * Math.PI / 180) : 
+                             mode === 'GRA' ? Math.sin(value * Math.PI / 200) : Math.sin(value);
+                    break;
+                case 'cos':
+                    result = mode === 'DEG' ? Math.cos(value * Math.PI / 180) : 
+                             mode === 'GRA' ? Math.cos(value * Math.PI / 200) : Math.cos(value);
+                    break;
+                case 'tan':
+                    result = mode === 'DEG' ? Math.tan(value * Math.PI / 180) : 
+                             mode === 'GRA' ? Math.tan(value * Math.PI / 200) : Math.tan(value);
+                    break;
+                case 'ln':
+                    result = value > 0 ? Math.log(value) : 'Error';
+                    break;
+                case 'log':
+                    result = value > 0 ? Math.log10(value) : 'Error';
+                    break;
+                case 'sqrt':
+                    result = value >= 0 ? Math.sqrt(value) : 'Error';
+                    specialDisplayEl.textContent = '√(' + value + ')';
+                    break;
+                case 'cube':
+                    result = Math.cbrt(value);
+                    specialDisplayEl.textContent = '∛(' + value + ')';
+                    break;
+                case 'x2':
+                    result = value * value;
+                    specialDisplayEl.textContent = 'sqr(' + value + ')';
+                    break;
+                case 'x3':
+                    result = value * value * value;
+                    break;
+                case 'x-1':
+                    result = value !== 0 ? 1 / value : 'Error';
+                    specialDisplayEl.textContent = '1/(' + value + ')';
+                    break;
+                case 'fact':
+                    if (value >= 0 && Number.isInteger(value) && value <= 170) {
+                        result = factorial(value);
+                    } else {
+                        result = 'Error';
+                    }
+                    break;
+                case 'exp':
+                    display += 'e';
+                    updateDisplay();
+                    return;
+                case 'abs':
+                    result = Math.abs(value);
+                    break;
+                case 'negate':
+                    result = -value;
+                    break;
+                case 'percent':
+                    result = value / 100;
+                    break;
+                default:
+                    return;
+            }
+
+            if (result === 'Error') {
+                display = 'Error';
+                specialDisplayEl.textContent = 'Math Error';
+            } else {
+                display = formatResult(result);
+            }
+            newEntry = true;
+            updateDisplay();
+        }
+
+        function factorial(n) {
+            if (n <= 1) return 1;
+            let result = 1;
+            for (let i = 2; i <= n; i++) result *= i;
+            return result;
+        }
+
+        function toggleShift() {
+            isShift = !isShift;
+            updateIndicators();
+            updateButtonLabels();
+        }
+
+        function toggleHyp() {
+            isHyp = !isHyp;
+            updateIndicators();
+        }
+
+        function updateButtonLabels() {
+            document.getElementById('btn-sin').textContent = isShift ? 'sin⁻¹' : 'sin';
+            document.getElementById('btn-cos').textContent = isShift ? 'cos⁻¹' : 'cos';
+            document.getElementById('btn-tan').textContent = isShift ? 'tan⁻¹' : 'tan';
+            document.getElementById('btn-ln').textContent = isShift ? 'eˣ' : 'ln';
+            document.getElementById('btn-sqrt').textContent = isShift ? 'x²' : '√';
+            document.getElementById('btn-cube').textContent = isShift ? '∛' : 'x³';
+            document.getElementById('btn-log').textContent = isShift ? '10ˣ' : 'log';
+            document.getElementById('btn-x2').textContent = isShift ? 'x³' : 'x²';
+            document.getElementById('btn-x3').textContent = isShift ? 'x⁴' : 'x³';
+            document.getElementById('btn-exp').textContent = isShift ? '10ˣ' : 'EXP';
+            document.getElementById('btn-abs').textContent = isShift ? 'Abs' : 'Abs';
+            document.getElementById('btn-fact').textContent = isShift ? 'nPr' : 'x!';
+        }
+
+        function setMode(newMode) {
+            if (newMode === 'MODE') {
+                const modes = ['DEG', 'RAD', 'GRA'];
+                const currentIndex = modes.indexOf(mode);
+                mode = modes[(currentIndex + 1) % modes.length];
+            } else {
+                mode = newMode;
+            }
+            specialDisplayEl.textContent = mode + ' mode';
+            updateIndicators();
+        }
+
+        function memoryAdd() {
+            memory += parseFloat(display);
+            newEntry = true;
+            updateIndicators();
+            specialDisplayEl.textContent = 'M+';
+        }
+
+        function memorySub() {
+            memory -= parseFloat(display);
+            newEntry = true;
+            updateIndicators();
+            specialDisplayEl.textContent = 'M-';
+        }
+
+        function memoryRecall() {
+            display = formatResult(memory);
+            newEntry = true;
+            updateDisplay();
+            specialDisplayEl.textContent = 'MR';
+        }
+
+        function memoryClear() {
+            memory = 0;
+            updateIndicators();
+            specialDisplayEl.textContent = 'MC';
+        }
+
+        function pressClear() {
+            if (display.length > 1) {
+                display = display.slice(0, -1);
+            } else {
+                display = '0';
+            }
+            updateDisplay();
+        }
+
+        function pressAllClear() {
+            display = '0';
+            expression = '';
+            pendingOp = null;
+            pendingValue = null;
+            newEntry = true;
+            specialDisplayEl.textContent = '';
+            updateDisplay();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const keyMap = {
+                '0': '0', '1': '1', '2': '2', '3': '3', '4': '4',
+                '5': '5', '6': '6', '7': '7', '8': '8', '9': '9',
+                '.': '.', '+': '+', '-': '-', '*': '*', '/': '/',
+                '=': '=', 'Enter': '=', 'Escape': 'AC', 'Backspace': 'DEL',
+                '(': '(', ')': ')'
+            };
+            
+            if (keyMap[e.key]) {
+                e.preventDefault();
+                const key = keyMap[e.key];
+                if (key === '=') calculate();
+                else if (key === 'AC') pressAllClear();
+                else if (key === 'DEL') pressClear();
+                else if (['+', '-', '*', '/'].includes(key)) pressOperator(key);
+                else pressNumber(key);
+            }
+        });
+
+        updateDisplay();
+    </script>
+</body>
+</html>

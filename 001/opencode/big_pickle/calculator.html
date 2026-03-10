@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casio fx-82MS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .calculator {
+            background: linear-gradient(145deg, #2d2d3a, #1e1e28);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            max-width: 380px;
+            width: 100%;
+        }
+
+        .brand {
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .display-container {
+            background: #9fa98f;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .mode-indicator {
+            font-size: 10px;
+            color: #333;
+            height: 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .memory-indicator {
+            font-size: 10px;
+            color: #333;
+        }
+
+        .display {
+            background: #c5d1b8;
+            border-radius: 3px;
+            padding: 10px;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            color: #333;
+            min-height: 50px;
+            word-break: break-all;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .display.sup {
+            font-size: 14px;
+            min-height: 25px;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+        }
+
+        .btn {
+            padding: 12px 6px;
+            font-size: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.1s;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-gray {
+            background: #4a4a5a;
+            color: #fff;
+            box-shadow: 0 3px 0 #2a2a3a;
+        }
+
+        .btn-gray:hover {
+            background: #5a5a6a;
+        }
+
+        .btn-orange {
+            background: #e67e22;
+            color: #fff;
+            box-shadow: 0 3px 0 #c0392b;
+        }
+
+        .btn-orange:hover {
+            background: #f39c12;
+        }
+
+        .btn-green {
+            background: #27ae60;
+            color: #fff;
+            box-shadow: 0 3px 0 #1e8449;
+        }
+
+        .btn-green:hover {
+            background: #2ecc71;
+        }
+
+        .btn-blue {
+            background: #3498db;
+            color: #fff;
+            box-shadow: 0 3px 0 #2980b9;
+        }
+
+        .btn-blue:hover {
+            background: #5dade2;
+        }
+
+        .btn-purple {
+            background: #8e44ad;
+            color: #fff;
+            box-shadow: 0 3px 0 #6c3483;
+        }
+
+        .btn-purple:hover {
+            background: #9b59b6;
+        }
+
+        .btn-red {
+            background: #c0392b;
+            color: #fff;
+            box-shadow: 0 3px 0 #922b21;
+        }
+
+        .btn-red:hover {
+            background: #e74c3c;
+        }
+
+        .btn-yellow {
+            background: #f1c40f;
+            color: #333;
+            box-shadow: 0 3px 0 #d4ac0d;
+        }
+
+        .btn-yellow:hover {
+            background: #f4d03f;
+        }
+
+        .btn-light {
+            background: #ecf0f1;
+            color: #333;
+            box-shadow: 0 3px 0 #bdc3c7;
+        }
+
+        .btn-light:hover {
+            background: #fff;
+        }
+
+        .btn-dark {
+            background: #34495e;
+            color: #fff;
+            box-shadow: 0 3px 0 #1a252f;
+        }
+
+        .btn-dark:hover {
+            background: #4a6572;
+        }
+
+        .btn.equal {
+            grid-column: span 2;
+            background: #e67e22;
+            color: #fff;
+            box-shadow: 0 3px 0 #c0392b;
+        }
+
+        .btn.zero {
+            grid-column: span 2;
+        }
+
+        .btn-small {
+            font-size: 10px;
+            padding: 8px 4px;
+        }
+
+        .row {
+            display: contents;
+        }
+
+        .shift-indicator {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            font-size: 10px;
+            color: #333;
+        }
+
+        .alpha-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 10px;
+            color: #333;
+        }
+
+        .display-wrapper {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="brand">CASIO fx-82MS</div>
+        <div class="display-container">
+            <div class="mode-indicator">
+                <span id="mode">DEG</span>
+                <span id="hyp">HYP</span>
+                <span id="shift">SHIFT</span>
+                <span id="alpha">ALPHA</span>
+            </div>
+            <div class="display-wrapper">
+                <div class="display" id="display">0</div>
+            </div>
+        </div>
+        <div class="buttons">
+            <button class="btn btn-gray" onclick="press('mode')">MODE</button>
+            <button class="btn btn-gray" onclick="press('shift')">SHIFT</button>
+            <button class="btn btn-gray" onclick="press('alpha')">ALPHA</button>
+            <button class="btn btn-red" onclick="press('on')">ON</button>
+            <button class="btn btn-gray" onclick="press('x^2')">x²</button>
+
+            <button class="btn btn-blue" onclick="press('hyp')">HYP</button>
+            <button class="btn btn-blue" onclick="press('sin')">sin</button>
+            <button class="btn btn-blue" onclick="press('cos')">cos</button>
+            <button class="btn btn-blue" onclick="press('tan')">tan</button>
+            <button class="btn btn-gray" onclick="press('ln')">ln</button>
+            <button class="btn btn-gray" onclick="press('log')">log</button>
+
+            <button class="btn btn-orange" onclick="press('(')">(</button>
+            <button class="btn btn-orange" onclick="press(')')">)</button>
+            <button class="btn btn-orange" onclick="press('sxd')">S&#8652;D</button>
+            <button class="btn btn-orange" onclick="press('STA')">STA</button>
+            <button class="btn btn-gray" onclick="press('x!')">x!</button>
+
+            <button class="btn btn-green" onclick="press('7')">7</button>
+            <button class="btn btn-green" onclick="press('8')">8</button>
+            <button class="btn btn-green" onclick="press('9')">9</button>
+            <button class="btn btn-orange" onclick="press('DEL')">DEL</button>
+            <button class="btn btn-orange" onclick="press('AC')">AC</button>
+
+            <button class="btn btn-green" onclick="press('4')">4</button>
+            <button class="btn btn-green" onclick="press('5')">5</button>
+            <button class="btn btn-green" onclick="press('6')">6</button>
+            <button class="btn btn-orange" onclick="press('*')">×</button>
+            <button class="btn btn-orange" onclick="press('/')">÷</button>
+
+            <button class="btn btn-green" onclick="press('1')">1</button>
+            <button class="btn btn-green" onclick="press('2')">2</button>
+            <button class="btn btn-green" onclick="press('3')">3</button>
+            <button class="btn btn-orange" onclick="press('+')">+</button>
+            <button class="btn btn-orange" onclick="press('-')">-</button>
+
+            <button class="btn btn-green zero" onclick="press('0')">0</button>
+            <button class="btn btn-green" onclick="press('.')">.</button>
+            <button class="btn btn-orange" onclick="press('exp')">EXP</button>
+            <button class="btn btn-orange equal" onclick="press('=')">=</button>
+
+            <button class="btn btn-purple" onclick="press('pi')">&#960;</button>
+            <button class="btn btn-purple" onclick="press('e')">e</button>
+            <button class="btn btn-yellow" onclick="press('M+')">M+</button>
+            <button class="btn btn-yellow" onclick="press('M-')">M-</button>
+            <button class="btn btn-yellow" onclick="press('MR')">MR</button>
+
+            <button class="btn btn-dark" onclick="press('MC')">MC</button>
+            <button class="btn btn-dark" onclick="press('STO')">STO</button>
+            <button class="btn btn-dark" onclick="press('RCL')">RCL</button>
+            <button class="btn btn-dark" onclick="press('nCr')">nCr</button>
+            <button class="btn btn-dark" onclick="press('nPr')">nPr</button>
+
+            <button class="btn btn-light" onclick="press('sqrt')">&#8730;</button>
+            <button class="btn btn-light" onclick="press('cube')">&#8731;</button>
+            <button class="btn btn-light" onclick="press('pow')">x&#65437;</button>
+            <button class="btn btn-light" onclick="press('10x')">10&#65437;</button>
+            <button class="btn btn-light" onclick="press('ex')">e&#65437;</button>
+        </div>
+    </div>
+
+    <script>
+        let display = document.getElementById('display');
+        let expression = '';
+        let isShift = false;
+        let isAlpha = false;
+        let isHyp = false;
+        let memory = 0;
+        let angleMode = 'DEG';
+        let variables = {};
+
+        function updateDisplay() {
+            if (expression === '') {
+                display.textContent = '0';
+            } else {
+                display.textContent = expression;
+            }
+            updateIndicators();
+        }
+
+        function updateIndicators() {
+            document.getElementById('shift').textContent = isShift ? 'SHIFT' : '';
+            document.getElementById('alpha').textContent = isAlpha ? 'ALPHA' : '';
+            document.getElementById('hyp').textContent = isHyp ? 'HYP' : '';
+            document.getElementById('mode').textContent = angleMode;
+        }
+
+        function toDegrees(radians) {
+            if (angleMode === 'DEG') return radians * 180 / Math.PI;
+            if (angleMode === 'GRAD') return radians * 200 / Math.PI;
+            return radians;
+        }
+
+        function toRadians(degrees) {
+            if (angleMode === 'DEG') return degrees * Math.PI / 180;
+            if (angleMode === 'GRAD') return degrees * Math.PI / 200;
+            return degrees;
+        }
+
+        function calculate() {
+            try {
+                let expr = expression
+                    .replace(/×/g, '*')
+                    .replace(/÷/g, '/')
+                    .replace(/π/g, 'Math.PI')
+                    .replace(/e(?![x])/g, 'Math.E')
+                    .replace(/sin\(/g, 'Math.sin(toRadians(')
+                    .replace(/cos\(/g, 'Math.cos(toRadians(')
+                    .replace(/tan\(/g, 'Math.tan(toRadians(')
+                    .replace(/ln\(/g, 'Math.log(')
+                    .replace(/log\(/g, 'Math.log10(')
+                    .replace(/sqrt\(/g, 'Math.sqrt(')
+                    .replace(/(\d+)!\)/g, 'factorial($1))');
+
+                let result = eval(expr);
+                if (!isFinite(result) || isNaN(result)) {
+                    expression = 'Error';
+                } else {
+                    expression = result.toString();
+                    if (expression.length > 15) {
+                        expression = parseFloat(result.toPrecision(12)).toString();
+                    }
+                }
+            } catch (e) {
+                expression = 'Error';
+            }
+            updateDisplay();
+        }
+
+        function factorial(n) {
+            if (n === 0 || n === 1) return 1;
+            let result = 1;
+            for (let i = 2; i <= n; i++) result *= i;
+            return result;
+        }
+
+        function press(key) {
+            const shiftFunctions = {
+                'sin': 'sin⁻¹',
+                'cos': 'cos⁻¹',
+                'tan': 'tan⁻¹',
+                'ln': 'eˣ',
+                'log': '10ˣ',
+                'sqrt': 'x³',
+                'cube': '∛',
+                'pow': 'ʸ√x',
+                'x^2': 'x³',
+                'DEL': 'INS',
+                'M+': 'M-',
+                'MR': 'M-',
+                'MC': 'M+',
+                'nCr': 'nPr',
+                'pi': '2π',
+                'e': 'eˣ',
+                '10x': 'x²',
+                'ex': 'x³',
+                'STO': 'CLRAR',
+                'RCL': 'KL-4',
+                'STA': 'KL-3',
+                'x!': '%'
+            };
+
+            const alphaFunctions = {
+                'sin': 'A',
+                'cos': 'B',
+                'tan': 'C',
+                'ln': 'D',
+                'log': 'E',
+                'sqrt': 'F',
+                'cube': 'a',
+                'pow': 'b',
+                'x^2': 'c',
+                'DEL': 'd',
+                'M+': 'e',
+                'MR': 'f',
+                'MC': 'A',
+                'nCr': 'B',
+                'nPr': 'C',
+                'pi': 'D',
+                'e': 'E',
+                '10x': 'F',
+                'ex': 'a',
+                'STO': 'b',
+                'RCL': 'c',
+                'STA': 'd',
+                'x!': 'e',
+                '1': 'J',
+                '2': 'K',
+                '3': 'L',
+                '4': 'M',
+                '5': 'N',
+                '6': 'O',
+                '7': 'P',
+                '8': 'Q',
+                '9': 'R',
+                '0': 'r',
+                '.': 'e',
+                '+': 'F',
+                '-': 'a',
+                '*': 'b',
+                '/': 'c',
+                '('': 'd',
+                ')': 'e'
+            };
+
+            if (key === 'shift') {
+                isShift = !isShift;
+                isAlpha = false;
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'alpha') {
+                isAlpha = !isAlpha;
+                isShift = false;
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'hyp') {
+                isHyp = !isHyp;
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'mode') {
+                const modes = ['DEG', 'RAD', 'GRAD'];
+                angleMode = modes[(modes.indexOf(angleMode) + 1) % 3];
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'AC') {
+                expression = '';
+                isShift = false;
+                isAlpha = false;
+                isHyp = false;
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'DEL') {
+                expression = expression.slice(0, -1);
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'ON') {
+                expression = '';
+                memory = 0;
+                isShift = false;
+                isAlpha = false;
+                isHyp = false;
+                angleMode = 'DEG';
+                updateDisplay();
+                return;
+            }
+
+            if (key === '=') {
+                calculate();
+                return;
+            }
+
+            if (isShift && shiftFunctions[key]) {
+                const shiftKey = shiftFunctions[key];
+                if (key === 'sin') expression += 'sin⁻¹(';
+                else if (key === 'cos') expression += 'cos⁻¹(';
+                else if (key === 'tan') expression += 'tan⁻¹(';
+                else if (key === 'ln') expression += 'e^';
+                else if (key === 'log') expression += '10^';
+                else if (key === 'sqrt') expression += 'Math.cbrt(';
+                else if (key === 'cube') expression += 'Math.pow(, 1/3)';
+                else if (key === 'pow') expression += 'Math.pow(, 1/)';
+                else if (key === 'x^2') expression += 'Math.pow(, 3)';
+                else if (key === 'e') expression += 'Math.E^';
+                else if (key === '10x') expression += 'Math.pow(10, ';
+                isShift = false;
+                updateDisplay();
+                return;
+            }
+
+            if (isAlpha && alphaFunctions[key]) {
+                expression += alphaFunctions[key];
+                isAlpha = false;
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'M+') {
+                try {
+                    let val = eval(expression.replace(/×/g, '*').replace(/÷/g, '/')) || 0;
+                    memory += val;
+                    expression = '';
+                } catch (e) {}
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'M-') {
+                try {
+                    let val = eval(expression.replace(/×/g, '*').replace(/÷/g, '/')) || 0;
+                    memory -= val;
+                    expression = '';
+                } catch (e) {}
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'MR') {
+                expression += memory.toString();
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'MC') {
+                memory = 0;
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'pi') {
+                expression += 'π';
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'e' && !isShift) {
+                expression += 'e';
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'sqrt') {
+                expression += 'sqrt(';
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'cube') {
+                expression += 'Math.cbrt(';
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'pow') {
+                expression += '^';
+                updateDisplay();
+                return;
+            }
+
+            if (key === '10x') {
+                expression += '10^';
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'ex') {
+                expression += 'e^';
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'x^2') {
+                if (expression) {
+                    expression = '(' + expression + ')²';
+                }
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'x!') {
+                expression += '!';
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'exp') {
+                expression += 'e';
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'sxd') {
+                try {
+                    let val = parseFloat(expression);
+                    if (val === Math.floor(val)) {
+                        expression = (val / 1).toString();
+                    } else {
+                        expression = Math.round(val).toString();
+                    }
+                } catch (e) {}
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'nCr') {
+                expression += 'C';
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'nPr') {
+                expression += 'P';
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'STO') {
+                expression = 'STO ';
+                updateDisplay();
+                return;
+            }
+
+            if (key === 'RCL') {
+                expression = 'RCL ';
+                updateDisplay();
+                return;
+            }
+
+            expression += key;
+            updateDisplay();
+        }
+
+        document.addEventListener('keydown', function(e) {
+            const keyMap = {
+                '0': '0', '1': '1', '2': '2', '3': '3', '4': '4',
+                '5': '5', '6': '6', '7': '7', '8': '8', '9': '9',
+                '+': '+', '-': '-', '*': '*', '/': '/', '.': '.',
+                '(': '(', ')': ')', '=': '=', 'Enter': '=',
+                'Escape': 'AC', 'Backspace': 'DEL', 'Delete': 'DEL'
+            };
+
+            if (keyMap[e.key]) {
+                press(keyMap[e.key]);
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -6,9 +6,13 @@ import html
 import shutil
 from pathlib import Path
 
+from render_benchmark_table import read_rows, render_html
+
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist"
+BENCHMARK_CSV = ROOT / "benchmark_runs.csv"
+BENCHMARK_HTML_NAME = "benchmark-runs.html"
 
 EXCLUDED_DIRS = {
     ".git",
@@ -102,9 +106,42 @@ def render_tree(node: dict[str, object], parent_parts: tuple[str, ...] = ()) -> 
     return f"<ul>{''.join(items)}</ul>"
 
 
-def build_index(html_files: list[Path]) -> str:
+def publish_benchmark_artifacts() -> bool:
+    if not BENCHMARK_CSV.exists():
+        return False
+
+    rows = read_rows(BENCHMARK_CSV)
+    if not rows:
+        return False
+
+    (DIST / BENCHMARK_HTML_NAME).write_text(render_html(rows), encoding="utf-8")
+    shutil.copy2(BENCHMARK_CSV, DIST / BENCHMARK_CSV.name)
+    return True
+
+
+def build_index(html_files: list[Path], has_benchmark_table: bool) -> str:
     tree = build_tree(html_files)
     tree_markup = render_tree(tree)
+    benchmark_chip = ""
+    benchmark_panel = ""
+
+    if has_benchmark_table:
+        benchmark_chip = (
+            f"<a class='chip' href='{BENCHMARK_HTML_NAME}'>Benchmark table</a>"
+            f"<a class='chip' href='{BENCHMARK_CSV.name}'>Benchmark CSV</a>"
+        )
+        benchmark_panel = f"""
+    <section class="benchmark">
+      <h2>Benchmark metrics</h2>
+      <p>
+        Compare recorded model runs by duration, token usage, cache behavior, and cost.
+      </p>
+      <div class="actions">
+        <a href="{BENCHMARK_HTML_NAME}">Open benchmark table</a>
+        <a href="{BENCHMARK_CSV.name}">Download benchmark CSV</a>
+      </div>
+    </section>
+"""
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -188,6 +225,42 @@ def build_index(html_files: list[Path]) -> str:
       border: 1px solid rgba(55, 42, 27, 0.08);
     }}
 
+    .benchmark {{
+      margin-top: 28px;
+      padding: 24px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255, 247, 239, 0.92), rgba(246, 235, 223, 0.9));
+      border: 1px solid rgba(155, 77, 36, 0.14);
+    }}
+
+    .benchmark h2 {{
+      margin: 0 0 8px;
+      font-size: 1.45rem;
+      color: var(--accent);
+    }}
+
+    .benchmark p {{
+      margin: 0;
+    }}
+
+    .actions {{
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }}
+
+    .actions a {{
+      width: fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.92rem;
+      font-weight: 600;
+      text-decoration: none;
+    }}
+
     ul {{
       margin: 10px 0 0 18px;
       padding: 0;
@@ -253,7 +326,9 @@ def build_index(html_files: list[Path]) -> str:
     <div class="meta">
       <span class="chip">{len(html_files)} HTML files published</span>
       <a class="chip" href="https://github.com/ModelFortyTwo/toy.llm">View repository</a>
+      {benchmark_chip}
     </div>
+    {benchmark_panel}
     <section class="tree">
       {tree_markup}
     </section>
@@ -273,7 +348,11 @@ def main() -> None:
     DIST.mkdir(parents=True)
 
     copy_publishable_content(html_files)
-    (DIST / "index.html").write_text(build_index(html_files), encoding="utf-8")
+    has_benchmark_table = publish_benchmark_artifacts()
+    (DIST / "index.html").write_text(
+        build_index(html_files, has_benchmark_table),
+        encoding="utf-8",
+    )
     (DIST / ".nojekyll").write_text("", encoding="utf-8")
 
 
