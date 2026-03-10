@@ -15,6 +15,27 @@ def parse_args() -> argparse.Namespace:
         default="benchmark-runs.html",
         help="Output HTML path",
     )
+    parser.add_argument(
+        "--latest-per-model-task",
+        action="store_true",
+        help="Keep only the latest row for each task/model/variant combination.",
+    )
+    parser.add_argument(
+        "--csv-output",
+        help="Optional output CSV path for the rendered row set.",
+    )
+    parser.add_argument(
+        "--title",
+        default="Benchmark Runs",
+        help="Page title shown in the rendered HTML.",
+    )
+    parser.add_argument(
+        "--subtitle",
+        default=(
+            "Generated from benchmark CSV output collected by the Codex and OpenCode runners."
+        ),
+        help="Subtitle shown under the page title.",
+    )
     return parser.parse_args()
 
 
@@ -39,6 +60,39 @@ def read_rows(csv_path: Path) -> list[dict[str, str]]:
     return rows
 
 
+def latest_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    latest_by_key: dict[tuple[str, str, str], dict[str, str]] = {}
+
+    for row in rows:
+        key = (
+            row.get("task_name", "") or row.get("task", ""),
+            row.get("model", ""),
+            row.get("variant", ""),
+        )
+        latest_by_key[key] = row
+
+    filtered = list(latest_by_key.values())
+    filtered.sort(
+        key=lambda row: (
+            row.get("task_name", "") or row.get("task", ""),
+            row.get("model", ""),
+            row.get("variant", ""),
+        )
+    )
+    return filtered
+
+
+def write_rows_csv(rows: list[dict[str, str]], csv_path: Path) -> None:
+    if not rows:
+        return
+
+    fieldnames = list(rows[0].keys())
+    with csv_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
 def format_number(value: str) -> str:
     if value == "":
         return ""
@@ -52,7 +106,7 @@ def build_table_rows(rows: list[dict[str, str]]) -> str:
     rendered = []
     for row in rows:
         output_path = row.get("output_path", "")
-        output_name = Path(output_path).name if output_path else ""
+        output_name = output_path if output_path else ""
         rendered.append(
             "<tr>"
             f"<td>{html.escape(row.get('task_name', ''))}</td>"
@@ -67,14 +121,21 @@ def build_table_rows(rows: list[dict[str, str]]) -> str:
             f"<td>{format_number(row.get('tokens_cache_write', ''))}</td>"
             f"<td>{format_number(row.get('tokens_total', ''))}</td>"
             f"<td>{html.escape(str(row.get('exit_code', '')))}</td>"
-            f"<td>{html.escape(row.get('started_at', ''))}</td>"
+            f"<td>{html.escape(row.get('started_date', ''))}</td>"
             f"<td class=\"path\" title=\"{html.escape(row.get('task_prompt', ''))}\">{html.escape(output_name)}</td>"
             "</tr>"
         )
     return "\n".join(rendered)
 
 
-def render_html(rows: list[dict[str, str]]) -> str:
+def render_html(
+    rows: list[dict[str, str]],
+    *,
+    title: str = "Benchmark Runs",
+    subtitle: str = (
+        "Generated from benchmark CSV output collected by the Codex and OpenCode runners."
+    ),
+) -> str:
     total_cost = 0.0
     for row in rows:
         try:
@@ -82,12 +143,15 @@ def render_html(rows: list[dict[str, str]]) -> str:
         except ValueError:
             continue
 
+    unique_models = len({row.get("model", "") for row in rows})
+    unique_tasks = len({row.get("task_name", "") or row.get("task", "") for row in rows})
+
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Benchmark Runs</title>
+  <title>{html.escape(title)}</title>
   <style>
     :root {{
       --bg: #f4efe7;
@@ -205,10 +269,12 @@ def render_html(rows: list[dict[str, str]]) -> str:
 </head>
 <body>
   <main>
-    <h1>Benchmark Runs</h1>
-    <p>Generated from benchmark CSV output collected by the OpenCode runner.</p>
+    <h1>{html.escape(title)}</h1>
+    <p>{html.escape(subtitle)}</p>
     <section class="summary">
       <div class="chip">Runs: {len(rows)}</div>
+      <div class="chip">Tasks: {unique_tasks}</div>
+      <div class="chip">Models: {unique_models}</div>
       <div class="chip">Total cost: ${total_cost:.8f}</div>
     </section>
     <div class="table-wrap">
@@ -227,7 +293,7 @@ def render_html(rows: list[dict[str, str]]) -> str:
             <th>Cache Write</th>
             <th>Total</th>
             <th>Exit</th>
-            <th>Started</th>
+            <th>Date</th>
             <th>Output File</th>
           </tr>
         </thead>
@@ -248,7 +314,16 @@ def main() -> None:
     html_path = Path(args.html_path)
 
     rows = read_rows(csv_path)
-    html_path.write_text(render_html(rows), encoding="utf-8")
+    if args.latest_per_model_task:
+        rows = latest_rows(rows)
+
+    if args.csv_output:
+        write_rows_csv(rows, Path(args.csv_output))
+
+    html_path.write_text(
+        render_html(rows, title=args.title, subtitle=args.subtitle),
+        encoding="utf-8",
+    )
 
 
 if __name__ == "__main__":

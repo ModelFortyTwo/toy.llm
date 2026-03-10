@@ -10,32 +10,11 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$Model,
 
-    [string]$Variant,
+    [string]$ReasoningEffort = "high",
 
     [string]$OutputPath = "output.txt",
 
     [string]$WorkingDirectory = ".",
-
-    [string]$Title,
-
-    [string]$Agent,
-
-    [string[]]$Files,
-
-    [switch]$ContinueLastSession,
-
-    [string]$Session,
-
-    [switch]$Fork,
-
-    [switch]$Share,
-
-    [switch]$Thinking,
-
-    [switch]$PrintLogs,
-
-    [ValidateSet("default", "json")]
-    [string]$Format = "json",
 
     [string]$MetricsCsvPath = "benchmark_runs.csv",
 
@@ -123,8 +102,7 @@ $resolvedMetricsCsvPath = if ($SkipMetrics) {
 }
 $csvWorkingDirectory = Get-RepoRelativePath -Path $resolvedWorkingDirectory -RepoRoot $repoRoot
 $csvOutputPath = Get-RepoRelativePath -Path $resolvedOutputPath -RepoRoot $repoRoot
-
-$effectiveFormat = if (-not $SkipMetrics -and $Format -ne "json") { "json" } else { $Format }
+$csvModel = "codex/$Model"
 
 $outputDirectory = Split-Path -Parent $resolvedOutputPath
 if ($outputDirectory) {
@@ -141,66 +119,30 @@ if ($resolvedMetricsCsvPath) {
 $startTime = Get-Date
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 $runId = [guid]::NewGuid().Guid
+$codexScriptPath = (Get-Command codex -ErrorAction Stop).Source
 
-$opencodeArgs = @("run", "--model", $Model, "--format", $effectiveFormat)
-
-if ($Variant) {
-    $opencodeArgs += @("--variant", $Variant)
-}
-
-if ($Title) {
-    $opencodeArgs += @("--title", $Title)
-}
-
-if ($Agent) {
-    $opencodeArgs += @("--agent", $Agent)
-}
-
-if ($ContinueLastSession) {
-    $opencodeArgs += "--continue"
-}
-
-if ($Session) {
-    $opencodeArgs += @("--session", $Session)
-}
-
-if ($Fork) {
-    $opencodeArgs += "--fork"
-}
-
-if ($Share) {
-    $opencodeArgs += "--share"
-}
-
-if ($Thinking) {
-    $opencodeArgs += "--thinking"
-}
-
-if ($PrintLogs) {
-    $opencodeArgs += "--print-logs"
-}
-
-foreach ($file in ($Files | Where-Object { $_ })) {
-    $opencodeArgs += @("--file", $file)
-}
-
-$opencodeArgs += "--"
-$opencodeArgs += $Task
-
-$commandLine = "opencode " + (($opencodeArgs | ForEach-Object {
+$codexArgs = @(
+    "exec",
+    "--full-auto",
+    "--json",
+    "-m", $Model,
+    "-c", "model_reasoning_effort=`"$ReasoningEffort`"",
+    $Task
+)
+$commandLine = "codex " + (($codexArgs | ForEach-Object {
     if ($_ -match '\s') { '"' + $_.Replace('"', '\"') + '"' } else { $_ }
 }) -join " ")
 
 $headerLines = @(
-    "OpenCode task run",
+    "Codex task run",
     "Run ID: $runId",
     "Started: $($startTime.ToString('yyyy-MM-dd HH:mm:ssK'))",
     "Working directory: $resolvedWorkingDirectory",
     "Output file: $resolvedOutputPath",
     "Metrics CSV: $(if ($resolvedMetricsCsvPath) { $resolvedMetricsCsvPath } else { '<disabled>' })",
     "Model: $Model",
-    "Variant: $(if ($Variant) { $Variant } else { '<default>' })",
-    "Format: $effectiveFormat",
+    "CSV model label: $csvModel",
+    "Reasoning effort: $ReasoningEffort",
     "Task label: $(if ($TaskLabel) { $TaskLabel } else { '<none>' })",
     "Task: $Task",
     "Command: $commandLine",
@@ -213,22 +155,15 @@ $exitCode = $null
 $stdoutPath = $null
 $stderrPath = $null
 $metricsSummary = $null
+$previousLocation = Get-Location
 
 try {
     $stdoutPath = [System.IO.Path]::GetTempFileName()
     $stderrPath = [System.IO.Path]::GetTempFileName()
 
-    $process = Start-Process `
-        -FilePath "opencode" `
-        -ArgumentList $opencodeArgs `
-        -WorkingDirectory $resolvedWorkingDirectory `
-        -NoNewWindow `
-        -Wait `
-        -PassThru `
-        -RedirectStandardOutput $stdoutPath `
-        -RedirectStandardError $stderrPath
-
-    $exitCode = $process.ExitCode
+    Set-Location $resolvedWorkingDirectory
+    & $codexScriptPath @codexArgs 1> $stdoutPath 2> $stderrPath
+    $exitCode = if ($LASTEXITCODE -ne $null) { $LASTEXITCODE } else { 0 }
 
     $stdoutContent = if (Test-Path $stdoutPath) { Get-Content -Path $stdoutPath -Raw } else { "" }
     $stderrContent = if (Test-Path $stderrPath) { Get-Content -Path $stderrPath -Raw } else { "" }
@@ -248,67 +183,55 @@ try {
         Write-Host $stderrContent
     }
 
-    if (-not $SkipMetrics -and $effectiveFormat -eq "json" -and $stdoutContent) {
+    if (-not $SkipMetrics -and $stdoutContent) {
         $events = Get-JsonEventsFromContent -Content $stdoutContent
-        $sessionId = ($events | Where-Object { $_.sessionID } | Select-Object -First 1 -ExpandProperty sessionID)
-        $stepFinishEvents = $events | Where-Object { $_.type -eq "step_finish" -and $_.part }
+        $threadId = ($events | Where-Object { $_.thread_id } | Select-Object -First 1 -ExpandProperty thread_id)
+        $turnCompletedEvents = $events | Where-Object { $_.type -eq "turn.completed" -and $_.usage }
 
-        $metricsSummary = [ordered]@{
-            started_date = $startTime.ToString("yyyy-MM-dd")
-            finished_date = $null
-            duration_ms = $null
-            duration_hms = $null
-            working_directory = $csvWorkingDirectory
-            output_path = $csvOutputPath
-            model = $Model
-            variant = if ($Variant) { $Variant } else { "" }
-            task = if ($TaskLabel) { $TaskLabel } else { $Task }
-            task_name = if ($TaskLabel) { $TaskLabel } else { $Task }
-            task_prompt = $Task
-            exit_code = $exitCode
-            cost_usd = 0.0
-            tokens_total = 0
-            tokens_input = 0
-            tokens_output = 0
-            tokens_reasoning = 0
-            tokens_cache_read = 0
-            tokens_cache_write = 0
-            step_finish_count = 0
-        }
-
-        foreach ($event in $stepFinishEvents) {
-            $metricsSummary.step_finish_count += 1
-
-            if ($null -ne $event.part.cost) {
-                $metricsSummary.cost_usd += [double]$event.part.cost
+        if ($threadId -or $turnCompletedEvents.Count -gt 0) {
+            $metricsSummary = [ordered]@{
+                started_date = $startTime.ToString("yyyy-MM-dd")
+                finished_date = $null
+                duration_ms = $null
+                duration_hms = $null
+                working_directory = $csvWorkingDirectory
+                output_path = $csvOutputPath
+                model = $csvModel
+                variant = $ReasoningEffort
+                task = if ($TaskLabel) { $TaskLabel } else { $Task }
+                task_name = if ($TaskLabel) { $TaskLabel } else { $Task }
+                task_prompt = $Task
+                exit_code = $exitCode
+                cost_usd = ""
+                tokens_total = 0
+                tokens_input = 0
+                tokens_output = 0
+                tokens_reasoning = 0
+                tokens_cache_read = 0
+                tokens_cache_write = 0
+                step_finish_count = 0
             }
 
-            if ($event.part.tokens) {
-                if ($null -ne $event.part.tokens.total) {
-                    $metricsSummary.tokens_total += [int64]$event.part.tokens.total
+            foreach ($event in $turnCompletedEvents) {
+                $metricsSummary.step_finish_count += 1
+
+                if ($null -ne $event.usage.input_tokens) {
+                    $metricsSummary.tokens_input += [int64]$event.usage.input_tokens
                 }
-                if ($null -ne $event.part.tokens.input) {
-                    $metricsSummary.tokens_input += [int64]$event.part.tokens.input
+                if ($null -ne $event.usage.output_tokens) {
+                    $metricsSummary.tokens_output += [int64]$event.usage.output_tokens
                 }
-                if ($null -ne $event.part.tokens.output) {
-                    $metricsSummary.tokens_output += [int64]$event.part.tokens.output
-                }
-                if ($null -ne $event.part.tokens.reasoning) {
-                    $metricsSummary.tokens_reasoning += [int64]$event.part.tokens.reasoning
-                }
-                if ($event.part.tokens.cache) {
-                    if ($null -ne $event.part.tokens.cache.read) {
-                        $metricsSummary.tokens_cache_read += [int64]$event.part.tokens.cache.read
-                    }
-                    if ($null -ne $event.part.tokens.cache.write) {
-                        $metricsSummary.tokens_cache_write += [int64]$event.part.tokens.cache.write
-                    }
+                if ($null -ne $event.usage.cached_input_tokens) {
+                    $metricsSummary.tokens_cache_read += [int64]$event.usage.cached_input_tokens
                 }
             }
+
+            $metricsSummary.tokens_total = $metricsSummary.tokens_input + $metricsSummary.tokens_output
         }
     }
 }
 finally {
+    Set-Location $previousLocation
     $stopwatch.Stop()
 
     $endTime = Get-Date
@@ -316,7 +239,6 @@ finally {
         $metricsSummary.finished_date = $endTime.ToString("yyyy-MM-dd")
         $metricsSummary.duration_ms = [int64][math]::Round($stopwatch.Elapsed.TotalMilliseconds)
         $metricsSummary.duration_hms = Format-Duration -Duration $stopwatch.Elapsed
-        $metricsSummary.cost_usd = [string]::Format([System.Globalization.CultureInfo]::InvariantCulture, "{0:F8}", [double]$metricsSummary.cost_usd)
 
         $metricsObject = [pscustomobject]$metricsSummary
         if (Test-Path $resolvedMetricsCsvPath) {
@@ -338,14 +260,13 @@ finally {
     if ($metricsSummary) {
         $footerLines += @(
             "Session ID: $(if ($metricsSummary.session_id) { $metricsSummary.session_id } else { '<unknown>' })",
-            "Cost (USD): $($metricsSummary.cost_usd)",
             "Tokens total: $($metricsSummary.tokens_total)",
             "Tokens input: $($metricsSummary.tokens_input)",
             "Tokens output: $($metricsSummary.tokens_output)",
             "Tokens reasoning: $($metricsSummary.tokens_reasoning)",
             "Tokens cache read: $($metricsSummary.tokens_cache_read)",
             "Tokens cache write: $($metricsSummary.tokens_cache_write)",
-            "Step finishes: $($metricsSummary.step_finish_count)"
+            "Turn completions: $($metricsSummary.step_finish_count)"
         )
     }
 

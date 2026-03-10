@@ -6,15 +6,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
-      --bg: #1f1f1f;
-      --panel: #20212a;
-      --highlight: #f2c14c;
-      --key: #2c2d39;
-      --special-key: #4b4c5d;
-      --text-key: #f6f6f6;
-      --screen: #0f111a;
+      --bg: #05060a;
+      --panel: #23242f;
+      --panel-light: #2a2c3a;
+      --highlight: #f3c13c;
+      --accent: #4892ff;
+      --alert: #d65a5a;
+      --text: #f7f7f9;
+      --muted: #8b8e9c;
+      --screen: #090b12;
       --screen-border: #3a3b45;
-      font-family: "Segoe UI", "Roboto", sans-serif;
     }
 
     * {
@@ -24,57 +25,151 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: linear-gradient(145deg, #0c0c11, #1f1f2c);
+      background: radial-gradient(circle at top, #10151f, #05060a 60%);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
+      font-family: "Segoe UI", "Roboto", sans-serif;
+      color: var(--text);
     }
 
     .calculator {
-      width: min(360px, 90vw);
-      background: radial-gradient(circle at top, #3a3b45, #191a1f 55%);
-      border-radius: 24px;
-      padding: 24px 20px 30px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65);
+      width: min(420px, 90vw);
+      padding: 22px;
+      border-radius: 28px;
+      background: linear-gradient(180deg, #1c1d26, #13131b 60%, #090a10);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    .top-bar {
+    .brand {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
-      font-size: 0.8rem;
-      letter-spacing: 0.1em;
+      margin-bottom: 14px;
+    }
+
+    .brand .model {
+      font-size: 1.25rem;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .brand .serial {
+      color: var(--muted);
+      font-size: 0.85rem;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
     }
 
-    .top-bar .model {
-      font-weight: 600;
+    .badges {
+      display: flex;
+      gap: 6px;
+    }
+
+    .badge {
+      font-size: 0.65rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
     }
 
     .screen {
       background: var(--screen);
       border: 2px solid var(--screen-border);
-      border-radius: 16px;
+      border-radius: 18px;
       padding: 16px;
-      margin-bottom: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      min-height: 80px;
+      margin-bottom: 12px;
+      box-shadow: inset 0 -12px 45px rgba(0, 0, 0, 0.75);
     }
 
-    .screen .mode {
+    .screen-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .indicator {
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    .indicator.active {
+      opacity: 1;
+      color: var(--highlight);
+    }
+
+    .memory-indicator {
+      letter-spacing: 0.3em;
       font-size: 0.8rem;
-      color: #7b7d8c;
+      font-weight: 700;
+      min-width: 18px;
+      text-align: center;
+      color: var(--highlight);
+    }
+
+    .angle-mode {
+      font-weight: 600;
+      color: #d6d5e5;
     }
 
     #display {
-      font-size: 2rem;
-      word-break: break-all;
-      text-align: right;
+      font-size: clamp(2rem, 3vw, 2.8rem);
       font-family: "Digital-7", "Segoe UI", sans-serif;
+      text-align: right;
+      min-height: 48px;
+      line-height: 1.2;
+      word-break: break-word;
+      color: #fdfdfd;
+    }
+
+    .function-row {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .function-button {
+      background: var(--panel-light);
+      border: none;
+      border-radius: 10px;
+      padding: 10px 0;
+      color: var(--text);
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.45);
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    .function-button.yellow {
+      background: var(--highlight);
+      color: #111;
+    }
+
+    .function-button.red {
+      background: var(--alert);
+      color: #fff;
+    }
+
+    .function-button.accent {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: inset 0 -3px rgba(0, 0, 0, 0.35);
+    }
+
+    .function-button:active {
+      transform: translateY(1px);
+      box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.45);
     }
 
     .buttons {
@@ -85,118 +180,177 @@
 
     .buttons button {
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 14px 0;
       font-size: 0.95rem;
-      background: var(--key);
-      color: var(--text-key);
-      box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.25);
+      background: var(--panel);
+      color: var(--text);
+      box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.45);
       cursor: pointer;
-      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease;
     }
 
     .buttons button.special {
-      background: var(--special-key);
+      background: #393b4a;
     }
 
     .buttons button.accent {
       background: var(--highlight);
       color: #1a1a1a;
-      box-shadow: inset 0 -4px rgba(0, 0, 0, 0.18);
+      box-shadow: inset 0 -4px rgba(0, 0, 0, 0.25);
+    }
+
+    .buttons button.active {
+      box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.5);
     }
 
     .buttons button:active {
       transform: translateY(1px);
-      box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+      box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.4);
     }
 
     .buttons button.wide {
-      grid-column: span 2;
+      grid-column: span 6;
     }
 
-    @media (max-width: 420px) {
+    @media (max-width: 460px) {
+      .calculator {
+        padding: 18px;
+      }
+
+      .function-row,
       .buttons {
         gap: 6px;
       }
 
+      .function-button,
       .buttons button {
-        padding: 12px 0;
-        font-size: 0.8rem;
+        font-size: 0.7rem;
+        padding: 10px 0;
+      }
+
+      .screen {
+        padding: 12px;
       }
     }
   </style>
 </head>
 <body>
   <div class="calculator">
-    <div class="top-bar">
-      <div class="model">Casio fx-82MS</div>
-      <div class="serial">Scientific</div>
+    <div class="brand">
+      <div>
+        <div class="model">Casio fx-82MS</div>
+        <div class="serial">Scientific</div>
+      </div>
+      <div class="badges">
+        <span class="badge">2-Line</span>
+        <span class="badge">SVP</span>
+      </div>
     </div>
     <div class="screen">
-      <div class="mode" id="angle-mode">DEG</div>
+      <div class="screen-top">
+        <span id="shift-indicator" class="indicator">SHIFT</span>
+        <span id="alpha-indicator" class="indicator">ALPHA</span>
+        <span id="memory-indicator" class="memory-indicator"></span>
+        <span id="angle-mode" class="angle-mode">DEG</span>
+      </div>
       <div id="display">0</div>
     </div>
+    <div class="function-row">
+      <button type="button" class="function-button yellow" data-action="toggle-shift">SHIFT</button>
+      <button type="button" class="function-button red" data-action="toggle-alpha">ALPHA</button>
+      <button type="button" class="function-button" data-action="toggle-angle">MODE</button>
+      <button type="button" class="function-button" data-action="setup">SETUP</button>
+      <button type="button" class="function-button" data-action="power-on">ON</button>
+      <button type="button" class="function-button accent" data-action="clear">AC</button>
+    </div>
     <div class="buttons">
-      <button class="special" data-action="toggle-angle">DRG</button>
-      <button class="special" data-action="toggle-sign">+/-</button>
-      <button class="special" data-action="percent">%</button>
-      <button class="special" data-action="clear">AC</button>
-      <button class="special" data-action="delete">DEL</button>
-      <button class="special accent" data-action="ans">ANS</button>
+      <button type="button" data-action="memory-clear">MC</button>
+      <button type="button" data-action="memory-recall">MR</button>
+      <button type="button" data-action="memory-add">M+</button>
+      <button type="button" data-action="memory-subtract">M-</button>
+      <button type="button" data-action="delete">DEL</button>
+      <button type="button" data-value="π">π</button>
 
-      <button data-value="sin(">sin</button>
-      <button data-value="cos(">cos</button>
-      <button data-value="tan(">tan</button>
-      <button data-value="log(">log</button>
-      <button data-value="ln(">ln</button>
-      <button data-action="pi">π</button>
+      <button type="button" data-value="sin(">sin</button>
+      <button type="button" data-value="cos(">cos</button>
+      <button type="button" data-value="tan(">tan</button>
+      <button type="button" data-value="log(">log</button>
+      <button type="button" data-value="ln(">ln</button>
+      <button type="button" data-action="percent">%</button>
 
-      <button data-value="(">(</button>
-      <button data-value=")">)</button>
-      <button data-value="^">^</button>
-      <button data-value="√(">√</button>
-      <button data-value="exp(">e^x</button>
-      <button data-value="10^">10^</button>
+      <button type="button" data-action="square">x²</button>
+      <button type="button" data-action="cube">x³</button>
+      <button type="button" data-action="power-operation">x^y</button>
+      <button type="button" data-action="sqrt">√</button>
+      <button type="button" data-action="inverse">x⁻¹</button>
+      <button type="button" data-action="exp-func">e^x</button>
 
-      <button data-value="7">7</button>
-      <button data-value="8">8</button>
-      <button data-value="9">9</button>
-      <button data-value="÷">÷</button>
-      <button data-value="×">×</button>
-      <button data-value="-">-</button>
+      <button type="button" data-value="e">e</button>
+      <button type="button" data-value="10^">10^</button>
+      <button type="button" data-action="exp-notation">EXP</button>
+      <button type="button" data-action="toggle-angle">DRG</button>
+      <button type="button" data-action="ans">ANS</button>
+      <button type="button" data-action="toggle-format">S-D</button>
 
-      <button data-value="4">4</button>
-      <button data-value="5">5</button>
-      <button data-value="6">6</button>
-      <button data-value="+">+</button>
-      <button data-action="square">x²</button>
-      <button data-action="cube">x³</button>
+      <button type="button" data-value="7">7</button>
+      <button type="button" data-value="8">8</button>
+      <button type="button" data-value="9">9</button>
+      <button type="button" data-value="÷">÷</button>
+      <button type="button" data-value="×">×</button>
+      <button type="button" data-value="-">-</button>
 
-      <button data-value="1">1</button>
-      <button data-value="2">2</button>
-      <button data-value="3">3</button>
-      <button data-value="0">0</button>
-      <button data-value=".">.</button>
-      <button data-action="e">e</button>
+      <button type="button" data-value="4">4</button>
+      <button type="button" data-value="5">5</button>
+      <button type="button" data-value="6">6</button>
+      <button type="button" data-value="+">+</button>
+      <button type="button" data-value="(">(</button>
+      <button type="button" data-value=")">)</button>
 
-      <button class="wide accent" data-action="calculate">=</button>
+      <button type="button" data-value="1">1</button>
+      <button type="button" data-value="2">2</button>
+      <button type="button" data-value="3">3</button>
+      <button type="button" data-value="0">0</button>
+      <button type="button" data-value=".">.</button>
+      <button type="button" data-action="toggle-sign">+/-</button>
+
+      <button type="button" class="wide accent" data-action="calculate">=</button>
     </div>
   </div>
   <script>
-    (() => {
-      const display = document.querySelector('#display');
-      const modeBadge = document.querySelector('#angle-mode');
+    (function () {
+      const display = document.getElementById('display');
+      const modeBadge = document.getElementById('angle-mode');
+      const memoryIndicator = document.getElementById('memory-indicator');
+      const shiftIndicator = document.getElementById('shift-indicator');
+      const alphaIndicator = document.getElementById('alpha-indicator');
+      const formatButton = document.querySelector('[data-action="toggle-format"]');
+
+      const angleModes = ['DEG', 'RAD', 'GRAD'];
+      const operators = new Set(['+', '-', '×', '÷', '^']);
+
+      let angleIndex = 0;
+      let angleMode = angleModes[angleIndex];
       let expression = '';
       let lastAnswer = 0;
-      let angleMode = 'DEG';
+      let memoryValue = 0;
+      let hasError = false;
+      let isResultShown = false;
+      let showScientificNotation = false;
+      let shiftActive = false;
+      let alphaActive = false;
 
       const actions = {
-        'clear': () => {
+        clear: () => {
           expression = '';
+          isResultShown = false;
+          hasError = false;
           updateDisplay();
         },
         'delete': () => {
+          if (!expression) return;
           expression = expression.slice(0, -1);
+          isResultShown = false;
           updateDisplay();
         },
         'toggle-sign': () => {
@@ -206,74 +360,189 @@
           } else {
             expression = `-(${expression})`;
           }
+          isResultShown = false;
           updateDisplay();
         },
-        'percent': () => {
+        percent: () => {
           if (!expression) return;
-          expression += '*0.01';
+          expression = `(${expression})*0.01`;
+          isResultShown = false;
           updateDisplay();
         },
-        'ans': () => {
-          expression += String(lastAnswer);
-          updateDisplay();
+        ans: () => {
+          appendSymbol('ANS');
         },
-        'pi': () => {
-          expression += 'π';
-          updateDisplay();
-        },
-        'square': () => {
+        square: () => {
+          if (!expression) return;
+          isResultShown = false;
           expression += '^2';
           updateDisplay();
         },
-        'cube': () => {
+        cube: () => {
+          if (!expression) return;
+          isResultShown = false;
           expression += '^3';
           updateDisplay();
         },
-        'e': () => {
-          expression += 'e';
+        'power-operation': () => {
+          if (isResultShown) {
+            isResultShown = false;
+          }
+          expression += '^';
           updateDisplay();
         },
+        sqrt: () => {
+          if (isResultShown) {
+            isResultShown = false;
+          }
+          expression += '√(';
+          updateDisplay();
+        },
+        inverse: () => {
+          if (!expression) return;
+          expression = `1/(${expression})`;
+          isResultShown = false;
+          updateDisplay();
+        },
+        'exp-func': () => {
+          appendSymbol('exp(');
+        },
+        'exp-notation': () => {
+          appendSymbol('×10^');
+        },
+        'memory-clear': () => {
+          memoryValue = 0;
+          updateMemoryIndicator();
+        },
+        'memory-recall': () => {
+          appendSymbol(formatNumber(memoryValue));
+        },
+        'memory-add': () => {
+          const value = evaluateExpression(expression);
+          if (value === undefined) return;
+          memoryValue += value;
+          updateMemoryIndicator();
+        },
+        'memory-subtract': () => {
+          const value = evaluateExpression(expression);
+          if (value === undefined) return;
+          memoryValue -= value;
+          updateMemoryIndicator();
+        },
         'toggle-angle': () => {
-          angleMode = angleMode === 'DEG' ? 'RAD' : 'DEG';
+          angleIndex = (angleIndex + 1) % angleModes.length;
+          angleMode = angleModes[angleIndex];
           modeBadge.textContent = angleMode;
         },
-        'calculate': () => {
-          if (!expression) return;
-          try {
-            const sanitized = sanitizeExpression(expression);
-            const fn = new Function('sin', 'cos', 'tan', 'log', 'ln', 'sqrt', 'exp', 'ans', 'pi', 'e', `return ${sanitized};`);
-            const result = fn(
-              userSin,
-              userCos,
-              userTan,
-              userLog,
-              userLn,
-              Math.sqrt,
-              userExp,
-              lastAnswer,
-              Math.PI,
-              Math.E
-            );
-            if (Number.isFinite(result)) {
-              lastAnswer = result;
-              expression = String(result);
-              updateDisplay();
-            } else {
-              throw new Error('Invalid result');
-            }
-          } catch (err) {
-            expression = '';
-            display.textContent = 'Error';
+        calculate: () => {
+          const value = evaluateExpression(expression);
+          if (value === undefined) return;
+          lastAnswer = value;
+          expression = formatNumber(value);
+          isResultShown = true;
+          updateDisplay();
+        },
+        'toggle-format': () => {
+          showScientificNotation = !showScientificNotation;
+          updateFormatIndicator();
+          if (isResultShown) {
+            expression = formatNumber(lastAnswer);
+            updateDisplay();
           }
+        },
+        setup: () => {
+          expression = '';
+          lastAnswer = 0;
+          memoryValue = 0;
+          updateMemoryIndicator();
+          angleIndex = 0;
+          angleMode = angleModes[angleIndex];
+          modeBadge.textContent = angleMode;
+          showScientificNotation = false;
+          updateFormatIndicator();
+          isResultShown = false;
+          hasError = false;
+          updateDisplay();
+        },
+        'power-on': () => {
+          actions.clear();
+        },
+        'toggle-shift': () => {
+          shiftActive = !shiftActive;
+          shiftIndicator.classList.toggle('active', shiftActive);
+        },
+        'toggle-alpha': () => {
+          alphaActive = !alphaActive;
+          alphaIndicator.classList.toggle('active', alphaActive);
         }
       };
 
+      function appendSymbol(value) {
+        if (shouldResetAfterResult(value)) {
+          expression = '';
+          isResultShown = false;
+        }
+        expression += value;
+        updateDisplay();
+      }
+
+      function shouldResetAfterResult(symbol) {
+        return isResultShown && !operators.has(symbol);
+      }
+
       function updateDisplay() {
+        if (hasError) return;
         display.textContent = expression || '0';
+      }
+
+      function updateMemoryIndicator() {
+        const hasMemory = memoryValue !== 0;
+        memoryIndicator.textContent = hasMemory ? 'M' : '';
+        memoryIndicator.classList.toggle('active', hasMemory);
+      }
+
+      function updateFormatIndicator() {
+        if (formatButton) {
+          formatButton.classList.toggle('active', showScientificNotation);
+        }
+      }
+
+      function clearErrorState() {
+        if (!hasError) return;
+        hasError = false;
+        expression = '';
+        isResultShown = false;
+        updateDisplay();
+      }
+
+      function displayError() {
+        hasError = true;
+        expression = '';
+        isResultShown = false;
+        display.textContent = 'Error';
+      }
+
+      function evaluateExpression(raw) {
+        if (!raw) {
+          return lastAnswer;
+        }
+        try {
+          const sanitized = sanitizeExpression(raw);
+          const fn = new Function('sin', 'cos', 'tan', 'log', 'ln', 'sqrt', 'exp', 'ans', 'pi', 'e', `return ${sanitized};`);
+          const result = fn(userSin, userCos, userTan, userLog, userLn, Math.sqrt, userExp, lastAnswer, Math.PI, Math.E);
+          if (!Number.isFinite(result)) {
+            throw new Error('Invalid result');
+          }
+          return result;
+        } catch (error) {
+          displayError();
+          return undefined;
+        }
       }
 
       function sanitizeExpression(raw) {
         return raw
+          .replace(/×10\^/g, '*10**')
           .replace(/×/g, '*')
           .replace(/÷/g, '/')
           .replace(/π/g, 'pi')
@@ -283,8 +552,20 @@
           .replace(/\^/g, '**');
       }
 
-      function toRadians(value) {
-        return angleMode === 'DEG' ? (value * Math.PI) / 180 : value;
+      function formatNumber(value) {
+        if (!Number.isFinite(value)) {
+          return 'Err';
+        }
+        if (value === 0) {
+          return '0';
+        }
+        if (showScientificNotation) {
+          return value.toExponential(10).replace(/(?:\.0+)?e/, 'e');
+        }
+        if (Number.isInteger(value)) {
+          return String(value);
+        }
+        return Number.parseFloat(value.toPrecision(12)).toString();
       }
 
       function userSin(value) {
@@ -311,15 +592,31 @@
         return Math.exp(value);
       }
 
-      document.querySelectorAll('.buttons button').forEach(button => {
-        button.addEventListener('click', () => {
-          const value = button.getAttribute('data-value');
-          const action = button.getAttribute('data-action');
+      function toRadians(val) {
+        if (angleMode === 'RAD') {
+          return val;
+        }
+        if (angleMode === 'GRAD') {
+          return (val * Math.PI) / 200;
+        }
+        return (val * Math.PI) / 180;
+      }
+
+      document.querySelectorAll('.buttons button, .function-row button').forEach(button => {
+        button.addEventListener('click', event => {
+          const target = event.currentTarget;
+          const action = target.dataset.action;
+          const value = target.dataset.value;
+
+          clearErrorState();
+
           if (action && actions[action]) {
             actions[action]();
-          } else if (value) {
-            expression += value;
-            updateDisplay();
+            return;
+          }
+
+          if (value) {
+            appendSymbol(value);
           }
         });
       });

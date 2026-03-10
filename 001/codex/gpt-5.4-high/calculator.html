@@ -84,6 +84,38 @@
       letter-spacing: 0.06em;
     }
 
+    .meta-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.08)),
+        linear-gradient(180deg, rgba(63, 73, 66, 0.3), rgba(50, 58, 53, 0.12));
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.52),
+        inset 0 -1px 0 rgba(44, 53, 47, 0.18);
+      font-size: 0.64rem;
+      letter-spacing: 0.14em;
+      color: rgba(29, 37, 33, 0.78);
+      text-transform: uppercase;
+    }
+
+    .meta-strip__left,
+    .meta-strip__right {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .meta-strip__right {
+      align-items: flex-end;
+      text-align: right;
+    }
+
     .solar {
       margin-bottom: 16px;
       display: grid;
@@ -290,6 +322,17 @@
       </div>
     </header>
 
+    <section class="meta-strip" aria-hidden="true">
+      <div class="meta-strip__left">
+        <span>S-V.P.A.M.</span>
+        <span>2-Line Display</span>
+      </div>
+      <div class="meta-strip__right">
+        <span>Fraction Capable</span>
+        <span>Natural Input Style</span>
+      </div>
+    </section>
+
     <section class="solar" aria-hidden="true">
       <span></span><span></span><span></span><span></span><span></span>
     </section>
@@ -309,7 +352,7 @@
 
     <section id="keypad" class="keypad" aria-label="Calculator keypad"></section>
 
-    <div class="footnote">HTML + JavaScript replica with scientific functions, memory, and angle modes</div>
+    <div class="footnote">Scientific replica with trig, memory, factorial, constants, and DEG/RAD/GRAD modes</div>
   </main>
 
   <script>
@@ -585,8 +628,11 @@
       }
 
       if (state.justEvaluated) {
-        state.expression = "";
+        state.expression = `${fnName}(${formatNumber(state.answer)})`;
         state.justEvaluated = false;
+        consumeOneShotModes();
+        updateDisplay();
+        return;
       }
 
       if (shouldInsertMultiply(fnName)) {
@@ -608,6 +654,12 @@
       if (!state.expression) {
         state.expression = "-";
         state.justEvaluated = false;
+        updateDisplay();
+        return;
+      }
+
+      if (state.expression === "-") {
+        state.expression = "";
         updateDisplay();
         return;
       }

@@ -1,24 +1,28 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Casio fx-82MS Calculator</title>
   <style>
     :root {
-      --bg: #0f1724;
-      --panel: #1f2a3d;
-      --panel-2: #25364f;
-      --display: #d8ead1;
-      --text: #e4edf6;
-      --key: #2d3d56;
-      --key-fn: #35506f;
-      --key-num: #344966;
-      --key-op: #4f6f95;
-      --key-eq: #5f7a2a;
-      --accent: #d08f1a;
-      --warn: #8c3f46;
-      --shadow: rgba(0, 0, 0, 0.35);
+      --body-a: #141b29;
+      --body-b: #0b1018;
+      --shell-a: #28364b;
+      --shell-b: #1d283a;
+      --line: #51627f;
+      --display-bg: #a7bb95;
+      --display-line: #46593b;
+      --display-text: #15210f;
+      --display-soft: #2a3a1f;
+      --key: #334762;
+      --key-num: #3d516e;
+      --key-fn: #3a5879;
+      --key-op: #4f6b91;
+      --key-shift: #d39a27;
+      --key-ac: #8b4347;
+      --key-eq: #607f31;
+      --white: #eff4fb;
     }
 
     * {
@@ -31,97 +35,94 @@
       min-height: 100vh;
       display: grid;
       place-items: center;
-      background: radial-gradient(circle at 20% 20%, #1a2940 0%, #0d1320 40%, #080d15 100%);
-      color: var(--text);
+      background: radial-gradient(circle at 20% 20%, var(--body-a) 0%, var(--body-b) 60%, #070b12 100%);
+      color: var(--white);
       padding: 20px;
     }
 
-    .calculator {
+    .calc {
       width: min(430px, 100%);
-      background: linear-gradient(180deg, var(--panel) 0%, #1b2638 100%);
-      border-radius: 18px;
-      box-shadow: 0 25px 50px -20px var(--shadow);
-      border: 1px solid #3f526f;
+      border-radius: 16px;
+      background: linear-gradient(180deg, var(--shell-a), var(--shell-b));
+      border: 1px solid var(--line);
       overflow: hidden;
+      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.4);
     }
 
-    .brand {
-      padding: 12px 16px 6px;
-      background: linear-gradient(180deg, #2c3a52, #243249);
-      border-bottom: 1px solid #4a5d7d;
+    .top {
+      padding: 12px 16px 8px;
+      background: linear-gradient(180deg, #2f3e57, #26344a);
+      border-bottom: 1px solid #5b6f8f;
       display: flex;
       justify-content: space-between;
-      align-items: end;
-      gap: 12px;
+      align-items: baseline;
+      letter-spacing: 0.6px;
     }
 
-    .brand .name {
-      font-weight: 700;
-      letter-spacing: 0.8px;
+    .top .brand {
       font-size: 17px;
-    }
-
-    .brand .model {
       font-weight: 700;
-      color: #c6d4e4;
+    }
+
+    .top .model {
       font-size: 14px;
+      font-weight: 700;
+      color: #c8d7ea;
     }
 
-    .display-wrap {
-      background: #9eb188;
+    .display {
       margin: 14px;
+      border: 2px solid var(--display-line);
       border-radius: 8px;
-      border: 2px solid #364932;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+      background: var(--display-bg);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
       padding: 10px 12px;
+      color: var(--display-text);
     }
 
-    .indicators {
-      height: 18px;
+    .ind {
       display: flex;
       align-items: center;
       gap: 10px;
-      color: #223112;
-      font-size: 12px;
+      min-height: 16px;
+      font-size: 11px;
       font-weight: 700;
+      color: var(--display-soft);
+      margin-bottom: 4px;
     }
 
-    .indicator {
-      opacity: 0.35;
+    .ind span {
+      opacity: 0.4;
     }
 
-    .indicator.active {
+    .ind span.on {
       opacity: 1;
     }
 
-    .expression {
-      min-height: 26px;
+    .expr,
+    .res {
       font-family: "Courier New", monospace;
+      text-align: right;
+      white-space: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .expr::-webkit-scrollbar,
+    .res::-webkit-scrollbar {
+      display: none;
+    }
+
+    .expr {
+      min-height: 24px;
       font-size: 18px;
-      color: #16210d;
-      text-align: right;
-      white-space: nowrap;
-      overflow-x: auto;
-      scrollbar-width: none;
+      color: #1a2a12;
     }
 
-    .expression::-webkit-scrollbar {
-      display: none;
-    }
-
-    .result {
+    .res {
       min-height: 38px;
-      font-family: "Courier New", monospace;
       font-size: 30px;
-      color: #0f1909;
-      text-align: right;
-      white-space: nowrap;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-
-    .result::-webkit-scrollbar {
-      display: none;
+      color: #101a0c;
     }
 
     .keys {
@@ -135,14 +136,14 @@
       border: 0;
       border-radius: 8px;
       min-height: 46px;
-      padding: 4px 6px;
-      color: #f3f7fc;
+      padding: 5px 6px;
       background: var(--key);
-      box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-      cursor: pointer;
+      color: var(--white);
       font-size: 15px;
       font-weight: 700;
-      line-height: 1.1;
+      line-height: 1.05;
+      cursor: pointer;
+      box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.13);
       user-select: none;
     }
 
@@ -150,19 +151,20 @@
       transform: translateY(1px);
     }
 
-    .k-fn { background: var(--key-fn); }
-    .k-num { background: var(--key-num); }
-    .k-op { background: var(--key-op); }
-    .k-eq { background: var(--key-eq); }
-    .k-shift { background: var(--accent); color: #1f1300; }
-    .k-ac { background: var(--warn); }
+    .num { background: var(--key-num); }
+    .fn { background: var(--key-fn); }
+    .op { background: var(--key-op); }
+    .shift { background: var(--key-shift); color: #211400; }
+    .ac { background: var(--key-ac); }
+    .eq { background: var(--key-eq); }
 
     .sub {
       display: block;
+      min-height: 10px;
+      margin-top: 2px;
       font-size: 10px;
       opacity: 0.82;
-      margin-top: 2px;
-      min-height: 10px;
+      font-weight: 600;
     }
 
     @media (max-width: 420px) {
@@ -170,337 +172,530 @@
         min-height: 42px;
         font-size: 14px;
       }
-      .result {
+      .res {
         font-size: 26px;
       }
     }
   </style>
 </head>
 <body>
-  <main class="calculator" aria-label="Casio fx-82MS calculator">
-    <div class="brand">
-      <div class="name">CASIO</div>
+  <main class="calc" aria-label="Casio fx-82MS calculator">
+    <header class="top">
+      <div class="brand">CASIO</div>
       <div class="model">fx-82MS</div>
-    </div>
+    </header>
 
-    <section class="display-wrap">
-      <div class="indicators">
-        <span class="indicator" id="shift-ind">SHIFT</span>
-        <span class="indicator" id="mode-ind">DEG</span>
+    <section class="display">
+      <div class="ind">
+        <span id="shift-ind">SHIFT</span>
+        <span id="mode-ind" class="on">DEG</span>
       </div>
-      <div class="expression" id="expression"></div>
-      <div class="result" id="result">0</div>
+      <div id="expr" class="expr"></div>
+      <div id="res" class="res">0</div>
     </section>
 
-    <section class="keys">
-      <button class="k-shift" data-action="shift">SHIFT</button>
-      <button class="k-fn" data-action="drg">DRG<span class="sub">mode</span></button>
-      <button class="k-fn" data-token="(">(</button>
-      <button class="k-fn" data-token=")">)</button>
-      <button class="k-fn" data-action="del">DEL</button>
-      <button class="k-ac" data-action="ac">AC</button>
+    <section class="keys" id="keys">
+      <button class="shift" data-action="shift">SHIFT</button>
+      <button class="fn" data-action="drg">DRG<span class="sub">mode</span></button>
+      <button class="fn" data-token="(">(</button>
+      <button class="fn" data-token=")">)</button>
+      <button class="fn" data-action="del">DEL</button>
+      <button class="ac" data-action="ac">AC</button>
 
-      <button class="k-fn fn-key" data-primary="sin(" data-shift="asin(">sin<span class="sub">asin</span></button>
-      <button class="k-fn fn-key" data-primary="cos(" data-shift="acos(">cos<span class="sub">acos</span></button>
-      <button class="k-fn fn-key" data-primary="tan(" data-shift="atan(">tan<span class="sub">atan</span></button>
-      <button class="k-fn fn-key" data-primary="log(" data-shift="10^(">log<span class="sub">10^x</span></button>
-      <button class="k-fn fn-key" data-primary="ln(" data-shift="e^(">ln<span class="sub">e^x</span></button>
-      <button class="k-fn" data-token="π">π</button>
+      <button class="fn fn-alt" data-primary="sin(" data-shift="asin(">sin<span class="sub">asin</span></button>
+      <button class="fn fn-alt" data-primary="cos(" data-shift="acos(">cos<span class="sub">acos</span></button>
+      <button class="fn fn-alt" data-primary="tan(" data-shift="atan(">tan<span class="sub">atan</span></button>
+      <button class="fn fn-alt" data-primary="log(" data-shift="10^(">log<span class="sub">10^x</span></button>
+      <button class="fn fn-alt" data-primary="ln(" data-shift="e^(">ln<span class="sub">e^x</span></button>
+      <button class="fn" data-token="pi">pi</button>
 
-      <button class="k-fn fn-key" data-primary="√(" data-shift="^2">√<span class="sub">x²</span></button>
-      <button class="k-fn fn-key" data-primary="^(" data-shift="!">x^y<span class="sub">x!</span></button>
-      <button class="k-fn" data-token="%">%</button>
-      <button class="k-op" data-token="÷">÷</button>
-      <button class="k-op" data-token="×">×</button>
-      <button class="k-fn" data-action="ans">Ans</button>
+      <button class="fn fn-alt" data-primary="sqrt(" data-shift="^2">sqrt<span class="sub">x^2</span></button>
+      <button class="fn fn-alt" data-primary="^" data-shift="!">x^y<span class="sub">x!</span></button>
+      <button class="fn" data-token="%">%</button>
+      <button class="op" data-token="/">/</button>
+      <button class="op" data-token="*">*</button>
+      <button class="fn" data-action="ans">Ans</button>
 
-      <button class="k-num" data-token="7">7</button>
-      <button class="k-num" data-token="8">8</button>
-      <button class="k-num" data-token="9">9</button>
-      <button class="k-op" data-token="-">-</button>
-      <button class="k-op" data-token="+">+</button>
-      <button class="k-fn" data-action="negate">(-)</button>
+      <button class="num" data-token="7">7</button>
+      <button class="num" data-token="8">8</button>
+      <button class="num" data-token="9">9</button>
+      <button class="op" data-token="-">-</button>
+      <button class="op" data-token="+">+</button>
+      <button class="fn" data-action="neg">(-)</button>
 
-      <button class="k-num" data-token="4">4</button>
-      <button class="k-num" data-token="5">5</button>
-      <button class="k-num" data-token="6">6</button>
-      <button class="k-fn" data-token="e">e</button>
-      <button class="k-fn" data-token="^(-1)">x⁻¹</button>
-      <button class="k-fn" data-token="E">EXP</button>
+      <button class="num" data-token="4">4</button>
+      <button class="num" data-token="5">5</button>
+      <button class="num" data-token="6">6</button>
+      <button class="fn" data-token="e">e</button>
+      <button class="fn" data-token="^(-1)">x^-1</button>
+      <button class="fn" data-token="E">EXP</button>
 
-      <button class="k-num" data-token="1">1</button>
-      <button class="k-num" data-token="2">2</button>
-      <button class="k-num" data-token="3">3</button>
-      <button class="k-num" data-token="0">0</button>
-      <button class="k-num" data-token=".">.</button>
-      <button class="k-eq" data-action="equal">=</button>
+      <button class="num" data-token="1">1</button>
+      <button class="num" data-token="2">2</button>
+      <button class="num" data-token="3">3</button>
+      <button class="num" data-token="0">0</button>
+      <button class="num" data-token=".">.</button>
+      <button class="eq" data-action="eq">=</button>
     </section>
   </main>
 
   <script>
-    const exprEl = document.getElementById("expression");
-    const resultEl = document.getElementById("result");
-    const shiftIndicator = document.getElementById("shift-ind");
-    const modeIndicator = document.getElementById("mode-ind");
-    const keys = document.querySelector(".keys");
+    const exprEl = document.getElementById("expr");
+    const resEl = document.getElementById("res");
+    const modeInd = document.getElementById("mode-ind");
+    const shiftInd = document.getElementById("shift-ind");
+    const keysEl = document.getElementById("keys");
 
-    const modes = ["DEG", "RAD", "GRAD"];
+    const ANGLE_MODES = ["DEG", "RAD", "GRAD"];
     let modeIndex = 0;
-    let shiftActive = false;
-    let expression = "";
-    let lastAnswer = 0;
+    let shift = false;
+    let expr = "";
+    let ans = 0;
+    let lastPreview = "0";
 
-    const factorial = (n) => {
-      if (!Number.isFinite(n) || n < 0 || Math.floor(n) !== n) {
-        throw new Error("Factorial requires non-negative integer");
+    function factorial(value) {
+      if (!Number.isFinite(value) || value < 0 || Math.floor(value) !== value) {
+        throw new Error("Math ERROR");
       }
-      let out = 1;
-      for (let i = 2; i <= n; i += 1) out *= i;
-      return out;
-    };
+      let total = 1;
+      for (let i = 2; i <= value; i += 1) total *= i;
+      return total;
+    }
 
-    const toRadians = (value) => {
-      const mode = modes[modeIndex];
+    function toRadians(value) {
+      const mode = ANGLE_MODES[modeIndex];
       if (mode === "DEG") return (value * Math.PI) / 180;
       if (mode === "GRAD") return (value * Math.PI) / 200;
       return value;
-    };
+    }
 
-    const fromRadians = (value) => {
-      const mode = modes[modeIndex];
+    function fromRadians(value) {
+      const mode = ANGLE_MODES[modeIndex];
       if (mode === "DEG") return (value * 180) / Math.PI;
       if (mode === "GRAD") return (value * 200) / Math.PI;
       return value;
-    };
+    }
 
-    const funcMap = {
-      sin: (v) => Math.sin(toRadians(v)),
-      cos: (v) => Math.cos(toRadians(v)),
-      tan: (v) => Math.tan(toRadians(v)),
-      asin: (v) => fromRadians(Math.asin(v)),
-      acos: (v) => fromRadians(Math.acos(v)),
-      atan: (v) => fromRadians(Math.atan(v)),
-      log: (v) => Math.log10(v),
-      ln: (v) => Math.log(v),
-      sqrt: (v) => Math.sqrt(v),
-      exp10: (v) => Math.pow(10, v),
-      expE: (v) => Math.exp(v)
-    };
-
-    const insertImplicitMultiplication = (expr) => {
-      return expr
-        .replace(/(\d|\)|π|e)(?=\(|sin|cos|tan|asin|acos|atan|log|ln|√|10\^|e\^)/g, "$1*")
-        .replace(/(\d|\)|π|e)(?=(\d|π|e))/g, "$1*")
-        .replace(/\)(?=\d|π|e)/g, ")*");
-    };
-
-    const expandFactorial = (expr) => {
-      let out = expr;
-      const factPattern = /(\b\d+(\.\d+)?|\([^()]+\)|π|e)!/;
-      while (factPattern.test(out)) {
-        out = out.replace(factPattern, "factorial($1)");
-      }
-      return out;
-    };
-
-    const sanitizeExpression = (expr) => {
-      let out = expr.replace(/\s+/g, "");
-      out = insertImplicitMultiplication(out);
-      out = expandFactorial(out);
-      out = out
-        .replace(/×/g, "*")
-        .replace(/÷/g, "/")
-        .replace(/π/g, "PI")
-        .replace(/√\(/g, "sqrt(")
-        .replace(/10\^\(/g, "exp10(")
-        .replace(/e\^\(/g, "expE(")
-        .replace(/\^/g, "**")
-        .replace(/%/g, "/100");
-      return out;
-    };
-
-    const formatNumber = (value) => {
+    function formatNumber(value) {
       if (!Number.isFinite(value)) return "Math ERROR";
+      if (Object.is(value, -0)) value = 0;
       const abs = Math.abs(value);
-      if ((abs >= 1e10 || (abs > 0 && abs < 1e-8))) {
-        return value.toExponential(8).replace(/\.?0+e/, "e");
+      if (abs !== 0 && (abs >= 1e10 || abs < 1e-8)) {
+        return value.toExponential(8).replace(/\.?(0+)e/, "e");
       }
-      const fixed = Number(value.toPrecision(12)).toString();
-      return fixed;
-    };
+      return Number(value.toPrecision(12)).toString();
+    }
 
-    const evaluateExpression = () => {
-      if (!expression) return;
+    function toDisplayExpression(text) {
+      return text
+        .replace(/\*/g, "x")
+        .replace(/\//g, "/")
+        .replace(/pi/g, "pi")
+        .replace(/sqrt\(/g, "sqrt(");
+    }
+
+    function isValueToken(token) {
+      return ["number", "const", "rparen", "postfix"].includes(token.kind);
+    }
+
+    function startsValue(token) {
+      return ["number", "const", "ident", "lparen"].includes(token.kind);
+    }
+
+    function tokenize(input) {
+      const out = [];
+      let i = 0;
+
+      while (i < input.length) {
+        const c = input[i];
+
+        if (c === " ") {
+          i += 1;
+          continue;
+        }
+
+        if (/[0-9.]/.test(c)) {
+          let number = "";
+          let dotCount = 0;
+          while (i < input.length && /[0-9.]/.test(input[i])) {
+            if (input[i] === ".") dotCount += 1;
+            number += input[i];
+            i += 1;
+          }
+          if (dotCount > 1 || number === ".") throw new Error("Syntax ERROR");
+
+          if (i < input.length && input[i] === "E") {
+            number += "E";
+            i += 1;
+            if (input[i] === "+" || input[i] === "-") {
+              number += input[i];
+              i += 1;
+            }
+            let expDigits = "";
+            while (i < input.length && /[0-9]/.test(input[i])) {
+              expDigits += input[i];
+              i += 1;
+            }
+            if (!expDigits) throw new Error("Syntax ERROR");
+            number += expDigits;
+          }
+
+          out.push({ kind: "number", value: Number(number) });
+          continue;
+        }
+
+        if (/[A-Za-z]/.test(c)) {
+          let word = "";
+          while (i < input.length && /[A-Za-z]/.test(input[i])) {
+            word += input[i];
+            i += 1;
+          }
+
+          if (word === "pi" || word === "e" || word === "Ans") {
+            out.push({ kind: "const", value: word });
+          } else {
+            out.push({ kind: "ident", value: word });
+          }
+          continue;
+        }
+
+        if (c === "(") {
+          out.push({ kind: "lparen", value: c });
+          i += 1;
+          continue;
+        }
+
+        if (c === ")") {
+          out.push({ kind: "rparen", value: c });
+          i += 1;
+          continue;
+        }
+
+        if (c === "!") {
+          out.push({ kind: "postfix", value: "!" });
+          i += 1;
+          continue;
+        }
+
+        if (c === "%") {
+          out.push({ kind: "postfix", value: "%" });
+          i += 1;
+          continue;
+        }
+
+        if ("+-*/^".includes(c)) {
+          out.push({ kind: "op", value: c });
+          i += 1;
+          continue;
+        }
+
+        throw new Error("Syntax ERROR");
+      }
+
+      const withMul = [];
+      for (let idx = 0; idx < out.length; idx += 1) {
+        const cur = out[idx];
+        withMul.push(cur);
+        const next = out[idx + 1];
+        if (!next) continue;
+
+        if (isValueToken(cur) && startsValue(next)) {
+          withMul.push({ kind: "op", value: "*" });
+        }
+      }
+
+      return withMul;
+    }
+
+    function evaluate(input) {
+      const tokens = tokenize(input);
+      let pos = 0;
+
+      function peek() {
+        return tokens[pos];
+      }
+
+      function consume(expectedKind, expectedValue) {
+        const token = tokens[pos];
+        if (!token || token.kind !== expectedKind || (expectedValue !== undefined && token.value !== expectedValue)) {
+          throw new Error("Syntax ERROR");
+        }
+        pos += 1;
+        return token;
+      }
+
+      function parseExpression() {
+        let value = parseTerm();
+        while (peek() && peek().kind === "op" && (peek().value === "+" || peek().value === "-")) {
+          const op = consume("op").value;
+          const rhs = parseTerm();
+          value = op === "+" ? value + rhs : value - rhs;
+        }
+        return value;
+      }
+
+      function parseTerm() {
+        let value = parseUnary();
+        while (peek() && peek().kind === "op" && (peek().value === "*" || peek().value === "/")) {
+          const op = consume("op").value;
+          const rhs = parseUnary();
+          if (op === "*") value *= rhs;
+          else value /= rhs;
+        }
+        return value;
+      }
+
+      function parseUnary() {
+        if (peek() && peek().kind === "op" && (peek().value === "+" || peek().value === "-")) {
+          const op = consume("op").value;
+          const rhs = parseUnary();
+          return op === "+" ? rhs : -rhs;
+        }
+        return parsePower();
+      }
+
+      function parsePower() {
+        let left = parsePostfix();
+        if (peek() && peek().kind === "op" && peek().value === "^") {
+          consume("op", "^");
+          const right = parsePower();
+          left = Math.pow(left, right);
+        }
+        return left;
+      }
+
+      function parsePostfix() {
+        let value = parsePrimary();
+
+        while (peek() && peek().kind === "postfix") {
+          const op = consume("postfix").value;
+          if (op === "!") value = factorial(value);
+          if (op === "%") value /= 100;
+        }
+
+        return value;
+      }
+
+      function parsePrimary() {
+        const token = peek();
+        if (!token) throw new Error("Syntax ERROR");
+
+        if (token.kind === "number") {
+          consume("number");
+          return token.value;
+        }
+
+        if (token.kind === "const") {
+          consume("const");
+          if (token.value === "pi") return Math.PI;
+          if (token.value === "e") return Math.E;
+          if (token.value === "Ans") return ans;
+          throw new Error("Syntax ERROR");
+        }
+
+        if (token.kind === "lparen") {
+          consume("lparen");
+          const inner = parseExpression();
+          consume("rparen");
+          return inner;
+        }
+
+        if (token.kind === "ident") {
+          const fnName = consume("ident").value;
+          consume("lparen");
+          const arg = parseExpression();
+          consume("rparen");
+
+          if (fnName === "sin") return Math.sin(toRadians(arg));
+          if (fnName === "cos") return Math.cos(toRadians(arg));
+          if (fnName === "tan") return Math.tan(toRadians(arg));
+          if (fnName === "asin") return fromRadians(Math.asin(arg));
+          if (fnName === "acos") return fromRadians(Math.acos(arg));
+          if (fnName === "atan") return fromRadians(Math.atan(arg));
+          if (fnName === "log") return Math.log10(arg);
+          if (fnName === "ln") return Math.log(arg);
+          if (fnName === "sqrt") return Math.sqrt(arg);
+
+          throw new Error("Syntax ERROR");
+        }
+
+        throw new Error("Syntax ERROR");
+      }
+
+      const value = parseExpression();
+      if (pos !== tokens.length) throw new Error("Syntax ERROR");
+      if (!Number.isFinite(value)) throw new Error("Math ERROR");
+      return value;
+    }
+
+    function refreshDisplay() {
+      exprEl.textContent = toDisplayExpression(expr);
+      modeInd.textContent = ANGLE_MODES[modeIndex];
+      shiftInd.classList.toggle("on", shift);
+      if (!expr) resEl.textContent = "0";
+    }
+
+    function consumeShift() {
+      if (shift) shift = false;
+    }
+
+    function preview() {
+      if (!expr) {
+        resEl.textContent = "0";
+        lastPreview = "0";
+        return;
+      }
       try {
-        const compiled = sanitizeExpression(expression);
-        const fn = new Function(
-          "PI",
-          "e",
-          "factorial",
-          "sin",
-          "cos",
-          "tan",
-          "asin",
-          "acos",
-          "atan",
-          "log",
-          "ln",
-          "sqrt",
-          "exp10",
-          "expE",
-          `return (${compiled});`
-        );
-        const value = fn(
-          Math.PI,
-          Math.E,
-          factorial,
-          funcMap.sin,
-          funcMap.cos,
-          funcMap.tan,
-          funcMap.asin,
-          funcMap.acos,
-          funcMap.atan,
-          funcMap.log,
-          funcMap.ln,
-          funcMap.sqrt,
-          funcMap.exp10,
-          funcMap.expE
-        );
-        if (!Number.isFinite(value)) throw new Error("Math error");
-        lastAnswer = value;
-        resultEl.textContent = formatNumber(value);
+        const value = evaluate(expr);
+        const formatted = formatNumber(value);
+        resEl.textContent = formatted;
+        lastPreview = formatted;
+      } catch (error) {
+        if (String(error.message).includes("Syntax")) {
+          resEl.textContent = lastPreview;
+        } else {
+          resEl.textContent = "Math ERROR";
+        }
+      }
+    }
+
+    function appendToken(token) {
+      expr += token;
+      preview();
+      refreshDisplay();
+    }
+
+    function runEquals() {
+      if (!expr) return;
+      try {
+        const value = evaluate(expr);
+        ans = value;
+        const formatted = formatNumber(value);
+        resEl.textContent = formatted;
+        lastPreview = formatted;
+        expr = formatted;
       } catch {
-        resultEl.textContent = "Math ERROR";
+        resEl.textContent = "Math ERROR";
       }
-    };
+      consumeShift();
+      refreshDisplay();
+    }
 
-    const updateDisplay = () => {
-      exprEl.textContent = expression;
-      if (!expression) {
-        resultEl.textContent = "0";
-      }
-      modeIndicator.textContent = modes[modeIndex];
-      shiftIndicator.classList.toggle("active", shiftActive);
-    };
-
-    const consumeShift = () => {
-      if (shiftActive) {
-        shiftActive = false;
-      }
-    };
-
-    const appendToken = (token) => {
-      expression += token;
-      evaluateExpression();
-      updateDisplay();
-    };
-
-    const handleAction = (action) => {
+    function runAction(action) {
       if (action === "shift") {
-        shiftActive = !shiftActive;
-        updateDisplay();
+        shift = !shift;
+        refreshDisplay();
         return;
       }
+
       if (action === "drg") {
-        modeIndex = (modeIndex + 1) % modes.length;
-        evaluateExpression();
-        updateDisplay();
+        modeIndex = (modeIndex + 1) % ANGLE_MODES.length;
+        preview();
+        refreshDisplay();
         return;
       }
+
       if (action === "ac") {
-        expression = "";
-        resultEl.textContent = "0";
+        expr = "";
+        resEl.textContent = "0";
+        lastPreview = "0";
         consumeShift();
-        updateDisplay();
+        refreshDisplay();
         return;
       }
+
       if (action === "del") {
-        expression = expression.slice(0, -1);
-        evaluateExpression();
+        expr = expr.slice(0, -1);
+        preview();
         consumeShift();
-        updateDisplay();
+        refreshDisplay();
         return;
       }
+
       if (action === "ans") {
-        appendToken(formatNumber(lastAnswer));
+        appendToken("Ans");
         consumeShift();
-        updateDisplay();
+        refreshDisplay();
         return;
       }
-      if (action === "negate") {
+
+      if (action === "neg") {
         appendToken("(-");
         consumeShift();
+        refreshDisplay();
         return;
       }
-      if (action === "equal") {
-        evaluateExpression();
-        if (resultEl.textContent !== "Math ERROR") {
-          expression = resultEl.textContent;
-        }
-        consumeShift();
-        updateDisplay();
+
+      if (action === "eq") {
+        runEquals();
       }
-    };
+    }
 
-    keys.addEventListener("click", (event) => {
-      const btn = event.target.closest("button");
-      if (!btn) return;
+    keysEl.addEventListener("click", (event) => {
+      const button = event.target.closest("button");
+      if (!button) return;
 
-      const action = btn.dataset.action;
+      const action = button.dataset.action;
       if (action) {
-        handleAction(action);
+        runAction(action);
         return;
       }
 
-      if (btn.classList.contains("fn-key")) {
-        const token = shiftActive ? btn.dataset.shift : btn.dataset.primary;
+      if (button.classList.contains("fn-alt")) {
+        const token = shift ? button.dataset.shift : button.dataset.primary;
         appendToken(token);
         consumeShift();
-        updateDisplay();
+        refreshDisplay();
         return;
       }
 
-      const token = btn.dataset.token;
-      if (token) {
-        appendToken(token);
-        consumeShift();
-        updateDisplay();
-      }
+      const token = button.dataset.token;
+      if (!token) return;
+      appendToken(token);
+      consumeShift();
+      refreshDisplay();
     });
 
     window.addEventListener("keydown", (event) => {
-      const map = {
-        Enter: "equal",
-        "=": "equal",
-        Backspace: "del",
-        Escape: "ac",
-        "*": "×",
-        "/": "÷",
-        x: "×",
-        X: "×",
-        p: "π",
-        P: "π"
+      const keyMap = {
+        Enter: { action: "eq" },
+        "=": { action: "eq" },
+        Backspace: { action: "del" },
+        Escape: { action: "ac" },
+        "*": { token: "*" },
+        x: { token: "*" },
+        X: { token: "*" },
+        "/": { token: "/" },
+        "^": { token: "^" },
+        "%": { token: "%" },
+        "(": { token: "(" },
+        ")": { token: ")" },
+        p: { token: "pi" },
+        P: { token: "pi" },
+        e: { token: "e" }
       };
 
-      if (map[event.key] === "equal" || map[event.key] === "del" || map[event.key] === "ac") {
+      if (keyMap[event.key]) {
         event.preventDefault();
-        handleAction(map[event.key]);
+        if (keyMap[event.key].action) {
+          runAction(keyMap[event.key].action);
+        } else {
+          appendToken(keyMap[event.key].token);
+          consumeShift();
+          refreshDisplay();
+        }
         return;
       }
 
-      if (map[event.key]) {
+      if (/[0-9.+-]/.test(event.key)) {
         event.preventDefault();
-        appendToken(map[event.key]);
-        return;
-      }
-
-      const valid = "0123456789.+-()^%";
-      if (valid.includes(event.key)) {
         appendToken(event.key);
+        consumeShift();
+        refreshDisplay();
       }
     });
 
-    updateDisplay();
+    refreshDisplay();
   </script>
 </body>
 </html>

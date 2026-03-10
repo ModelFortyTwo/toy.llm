@@ -1,0 +1,31 @@
+Codex task run
+Run ID: f65e4243-202b-469d-883e-ec15786559a2
+Started: 2026-03-10 10.40.09+02:00
+Working directory: C:\koodia\toy.llm\001\codex\gpt-5.4-high
+Output file: C:\koodia\toy.llm\001\codex\gpt-5.4-high\codex-output.txt
+Metrics CSV: C:\koodia\toy.llm\tmp\codex-runs.csv
+Model: gpt-5.4
+CSV model label: codex/gpt-5.4
+Reasoning effort: high
+Task label: codex-smoke
+Task: Reply with exactly: ok
+Command: codex exec --full-auto --json -m gpt-5.4 -c model_reasoning_effort="high" "Reply with exactly: ok"
+--------------------------------------------------------------------------------
+{"type":"thread.started","thread_id":"019cd6e7-510c-7d20-a6d1-b2af686ee95a"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"ok"}}
+{"type":"turn.completed","usage":{"input_tokens":17173,"cached_input_tokens":4480,"output_tokens":28}}
+
+
+--------------------------------------------------------------------------------
+Finished: 2026-03-10 10.41.14+02:00
+Duration: 00:01:04.984
+Exit code: 0
+Session ID: 019cd6e7-510c-7d20-a6d1-b2af686ee95a
+Tokens total: 17201
+Tokens input: 17173
+Tokens output: 28
+Tokens reasoning: 0
+Tokens cache read: 4480
+Tokens cache write: 0
+Turn completions: 1
